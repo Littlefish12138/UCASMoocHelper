@@ -230,22 +230,20 @@ class CoursePageHandler:
             print("等待超时，未收到完成图片")
             return False
 
-# ================== 主程序 ==================
-def main():
-    # 用户选择启动模式（示例：使用模式1，Edge 普通模式）
-    # 模式1: 自动启动，使用用户数据
-    page = BrowserLauncher.launch_with_user_data(browser_type='edge')
-    # 模式2: 无痕模式（需等待登录）
-    # def wait_login():
-    #     input("请完成登录后按回车...")
-    # page = BrowserLauncher.launch_incognito(browser_type='edge', wait_for_login_callback=wait_login)
-    # 模式3: 连接已有调试端口
-    # page = BrowserLauncher.connect_to_existing(port=9222)
+# ================== 主业务函数 ==================
+def run_video_task(launch_func: function, course_url = None):
+    """
+    执行挂课任务的主函数\n
+    :param launch_func: 可调用对象,返回ChromiumPage实例
+    :param course_url: 课程视频页面url,为None则提示用户输入
+    """
+    page = launch_func()
 
     # 打开课程页面
     course_url = input("请输入课程页面链接：").strip()
     if not course_url:
         course_url = "http://mooc.mooc.ucas.edu.cn/mooc-ans/mycourse/studentstudy?chapterId=577476&courseId=350140000037227&clazzid=350140000031973&enc=f1220c4fcaa1db6d27eefea233837606"
+    
     page.get(course_url)
     time.sleep(3)
 
@@ -316,4 +314,7 @@ def main():
     input("按回车退出...")
 
 if __name__ == "__main__":
-    main()
+    def default_launch():
+        return BrowserLauncher.launch_with_user_data(browser_type='edge')
+
+    run_video_task(default_launch)
