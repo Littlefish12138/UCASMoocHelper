@@ -13,6 +13,7 @@ import threading
 from collections import deque
 from DrissionPage import ChromiumPage, ChromiumOptions
 
+import utils
 # ================== 配置区域（选择器、关键字等） ==================
 class PageConfig:
     """页面元素选择器和请求关键字配置"""
@@ -39,12 +40,10 @@ class BrowserLauncher:
     # 默认浏览器路径和用户数据目录
     DEFAULT_PATHS = {
         'edge': {
-            'browser': r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
-            'user_data': r"C:\Users\huawei\AppData\Local\Microsoft\Edge\User Data"
+            'browser_path': r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
         },
         'chrome': {
-            'browser': "",  # 用户自行填写 Chrome 路径
-            'user_data': ""  # 用户自行填写 Chrome 用户数据路径
+            'browser_path': r"C:\Program Files\Google\Chrome\Application\chrome.exe",  
         }
     }
 
@@ -58,19 +57,22 @@ class BrowserLauncher:
 
     @classmethod
     def launch_with_user_data(cls, browser_type='edge', browser_path=None, user_data_dir=None):
-        """模式1：自动启动浏览器，使用指定用户数据目录"""
+        """模式1: 自动启动浏览器, 使用指定用户数据目录"""
+        # 如果未传入浏览器路径，尝试使用默认路径
         if browser_path is None:
-            browser_path = cls.DEFAULT_PATHS[browser_type]['browser']
+            browser_path = cls.DEFAULT_PATHS[browser_type]['browser_path']
         if user_data_dir is None:
-            user_data_dir = cls.DEFAULT_PATHS[browser_type]['user_data']
+            raise ValueError("错误: 未输入用户数据目录")
 
-        # 杀死现有进程（可选，避免端口冲突）
-        cls.kill_browser_process(browser_type)
+        # 如果用户使用默认数据目录，终止当前正在运行的 Edge 实例以避免冲突
+        if user_data_dir == utils.get_edge_user_data_dir():
+            print("尝试结束当前 Edge 实例")
+            cls.kill_browser_process(browser_type)
         time.sleep(2)
 
         print(f"正在启动 {browser_type.capitalize()} 浏览器...")
         co = ChromiumOptions()
-        co.set_local_port(9444)  # 固定调试端口，便于连接
+        co.set_local_port(9444)
         co.set_user_data_path(user_data_dir)
         co.set_browser_path(browser_path)
         page = ChromiumPage(co)
@@ -78,29 +80,33 @@ class BrowserLauncher:
         return page
 
     @classmethod
-    def launch_incognito(cls, browser_type='edge', wait_for_login_callback=None):
-        """模式2：无痕模式启动，等待登录完成信号"""
-        # 构建无痕参数
-        incognito_args = []
-        if browser_type == 'edge':
+    def launch_incognito(cls, browser_type='edge', login_callback=None):
+        """
+        模式2: 无痕模式启动, 等待登录完成信号\n
+        :param browser_type: 浏览器类型
+        :param login_callback: 登录回调函数
+        """
+        #incognito_args = []
+        # edge 和 chrome 的无痕启动参数是不同的
+        """if browser_type == 'edge':
             incognito_args = ['--inprivate']
         elif browser_type == 'chrome':
-            incognito_args = ['--incognito']
+            incognito_args = ['--incognito']"""
 
         # 使用临时用户数据目录（无痕模式会自动创建临时目录）
         co = ChromiumOptions()
-        co.set_local_port(9445)  # 使用不同端口，避免与普通模式冲突
+        co.set_local_port(9445)
         co.set_argument('--new-window')
-        for arg in incognito_args:
-            co.set_argument(arg)
+        co.incognito(True)
+        """for arg in incognito_args:
+            co.set_argument(arg)"""
 
-        # 无痕模式需要启动一个干净的浏览器实例
         page = ChromiumPage(co)
 
         print("已启动无痕模式浏览器，请手动登录...")
-        if wait_for_login_callback:
+        if login_callback:
             # 等待登录完成信号（如用户输入或事件）
-            wait_for_login_callback()
+            login_callback()
         else:
             input("登录完成后按回车继续...")
 
@@ -108,12 +114,11 @@ class BrowserLauncher:
 
     @classmethod
     def connect_to_existing(cls, port=9222):
-        """模式3：连接到已启动的调试端口浏览器"""
-        print(f"正在连接到调试端口 {port} 的浏览器...")
+        """模式3: 连接到已启动的调试端口浏览器"""
+        print(f"正在连接到调试端口为 {port} 的浏览器...")
         co = ChromiumOptions()
         co.set_local_port(port)
         page = ChromiumPage(co)
-        print("连接成功")
         return page
 
 # ================== 课程页面操作处理器 ==================
@@ -165,8 +170,11 @@ class CoursePageHandler:
         """
         return self.page.run_js(js)
 
-    def is_video_completed(self):
-        """判断当前视频页面是否显示已完成图标"""
+    def is_video_completed(self) -> bool:
+        """
+        判断当前视频是否已完成\n
+        方法为检查是否存在“任务点已完成字样”
+        """
         icon = self.page.ele(self.config.COMPLETED_ICON, timeout=2)
         if icon:
             aria_label = icon.attr('aria-label')
@@ -231,18 +239,21 @@ class CoursePageHandler:
             return False
 
 # ================== 主业务函数 ==================
-def run_video_task(launch_func: function, course_url = None):
+def run_video_task(launch_func: function, course_url):
     """
     执行挂课任务的主函数\n
-    :param launch_func: 可调用对象,返回ChromiumPage实例
+    :param launch_func: 可调用对象,返回ChromiumPage实例,应为BrowserLauncher下的launch_with_user_data或者launch_incognito
     :param course_url: 课程视频页面url,为None则提示用户输入
     """
     page = launch_func()
 
+    if course_url is None:
+        raise ValueError("错误：课程链接为空")
+    
     # 打开课程页面
-    course_url = input("请输入课程页面链接：").strip()
-    if not course_url:
-        course_url = "http://mooc.mooc.ucas.edu.cn/mooc-ans/mycourse/studentstudy?chapterId=577476&courseId=350140000037227&clazzid=350140000031973&enc=f1220c4fcaa1db6d27eefea233837606"
+    #course_url = input("请输入课程页面链接：").strip()
+    #if not course_url:
+    #    course_url = "http://mooc.mooc.ucas.edu.cn/mooc-ans/mycourse/studentstudy?chapterId=577476&courseId=350140000037227&clazzid=350140000031973&enc=f1220c4fcaa1db6d27eefea233837606"
     
     page.get(course_url)
     time.sleep(3)
@@ -289,7 +300,7 @@ def run_video_task(launch_func: function, course_url = None):
 
         # 检查是否已完成
         if handler.is_video_completed():
-            print("该视频已完成，跳过（不重试）")
+            print("该视频已完成，跳过")
             continue
 
         # 点击播放按钮
@@ -305,7 +316,7 @@ def run_video_task(launch_func: function, course_url = None):
         handler.stop_playback_monitor()
 
         if not success:
-            print("视频播放超时，将重新加入队列")
+            print("视频播放超时，等待进行重试")
             tasks.append((chap_idx, vid_idx))
 
         time.sleep(1)

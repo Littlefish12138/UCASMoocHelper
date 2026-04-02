@@ -12,6 +12,7 @@ from DrissionPage import ChromiumPage
 
 # 导入原有业务类（请确保 course_listener.py 在同一目录下或已安装）
 from course_listener import BrowserLauncher, CoursePageHandler, PageConfig
+import utils
 
 # ================== 业务函数（支持回调） ==================
 def run_video_task_with_ui(launch_func, course_url, log_callback=None, completion_callback=None):
@@ -149,14 +150,14 @@ class GuiApp:
         mode_frame.pack(fill=tk.X, pady=5)
 
         # 手动启动选项
-        manual_btn = ttk.Radiobutton(mode_frame, text="手动启动", variable=self.launch_mode,
+        manual_btn = ttk.Radiobutton(mode_frame, text="自动启动", variable=self.launch_mode,
                                     value="manual", command=self.on_mode_change)
         manual_btn.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
-        manual_hint = ttk.Label(mode_frame, text="(使用您的用户数据文件夹，程序自动启动浏览器)")
+        manual_hint = ttk.Label(mode_frame, text="(使用您的用户数据文件夹，程序启动带调试端口的浏览器)")
         manual_hint.grid(row=0, column=1, sticky=tk.W, padx=5)
 
         # 自动启动选项
-        auto_btn = ttk.Radiobutton(mode_frame, text="自动启动", variable=self.launch_mode,
+        auto_btn = ttk.Radiobutton(mode_frame, text="手动启动", variable=self.launch_mode,
                                 value="auto", command=self.on_mode_change)
         auto_btn.grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
         auto_hint = ttk.Label(mode_frame, text="(连接已开启调试端口的浏览器)")
@@ -271,11 +272,11 @@ class GuiApp:
         """切换浏览器时，自动填充默认路径（如果用户未修改）"""
         bt = self.browser_type.get()
         if bt == "Edge":
-            default_browser = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-            default_user_data = r"C:\Users\huawei\AppData\Local\Microsoft\Edge\User Data"
+            default_browser = utils.get_edge_path() or r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
+            default_user_data = utils.get_edge_user_data_dir() or ""
         else:  # Chrome
             default_browser = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-            default_user_data = r"C:\Users\huawei\AppData\Local\Google\Chrome\User Data"
+            default_user_data = r""
 
         if not self.browser_path.get():
             self.browser_path.set(default_browser)
@@ -292,8 +293,17 @@ class GuiApp:
             # 清空用户数据目录内容
             self.user_data_dir.set("不使用")
         else:
-            # 如果之前没有值，可尝试恢复默认值（可选）
-            if not self.user_data_dir.get():
+            self.user_data_dir.set("")
+            # 如果浏览器为Chrome，弹出警告并清空目录，不恢复默认路径
+            if self.browser_type.get() == "Chrome":
+                messagebox.showwarning(
+                    title="Chrome安全策略",
+                    message="自 Chrome 136 及以上版本，Google 增强了安全策略，不再允许您调试默认数据目录，导致本程序无法使用默认数据目录。\n"
+                    "高版本中，本程序仅能使用您的非标准数据目录。详见\n"
+                    "https://developer.chrome.com/blog/remote-debugging-port?hl=zh-cn",
+                )
+                self.user_data_dir.set("")
+            elif not self.user_data_dir.get():
                 self.on_browser_change()  # 重新填充默认路径
 
     def browse_browser(self):
