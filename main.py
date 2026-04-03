@@ -7,20 +7,20 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox, scrolledtext
 import threading
 import time
-from collections import deque
 from DrissionPage import ChromiumPage
 
 # 导入原有业务类（请确保 course_listener.py 在同一目录下或已安装）
-from course_listener import BrowserLauncher, CoursePageHandler, PageConfig
+from course_listener import BrowserLauncher, CoursePageHandler, run_video_task
 import utils
 
 # ================== 业务函数（支持回调） ==================
-def run_video_task_with_ui(launch_func, course_url, log_callback=None, completion_callback=None):
+def run_video_task_with_ui(launch_func: function, course_url, log_callback=None, login_callback: function= None, completion_callback=None):
     """
-    执行视频任务，支持回调输出日志和完成通知
+    执行视频任务，支持回调输出日志和完成通知\n
     :param launch_func: 可调用对象，返回 ChromiumPage 实例
     :param course_url: 课程页面URL
     :param log_callback: 接收字符串的回调，用于输出日志
+    :param login_callback: 登录回调，用于在无痕模式时弹出提示框，等待用户登陆并确认
     :param completion_callback: 任务完成时回调，无参数
     """
     def log(msg):
@@ -31,77 +31,21 @@ def run_video_task_with_ui(launch_func, course_url, log_callback=None, completio
 
     try:
         # 启动浏览器
-        page = launch_func()
+        page: ChromiumPage = launch_func()
 
         # 打开课程页面
         page.get(course_url)
         time.sleep(3)
 
+        # 无痕模式下等待用户登录
+        if login_callback is not None:
+            login_callback()
+        
         # 创建页面处理器
-        handler = CoursePageHandler(page, PageConfig)
+        handler = CoursePageHandler()
 
-        # 可选：展开章节（根据页面需要）
-        # handler.expand_all_chapters()
-
-        # 获取视频数量
-        video_counts = handler.get_chapter_video_counts()
-        total_chapters = len(video_counts)
-        log(f"检测到 {total_chapters} 章")
-
-        if total_chapters == 0:
-            log("未检测到章节，请检查页面结构")
-            return
-
-        # 构建任务队列
-        tasks = deque()
-        for chap_idx in range(1, total_chapters + 1):
-            video_num = video_counts[chap_idx - 1]
-            log(f"第 {chap_idx} 章共有 {video_num} 个视频")
-            for vid_idx in range(1, video_num + 1):
-                tasks.append((chap_idx, vid_idx))
-
-        log(f"总任务数: {len(tasks)}")
-        log("开始处理任务队列...\n")
-
-        # 处理任务
-        while tasks:
-            chap_idx, vid_idx = tasks.popleft()
-            log(f"\n正在处理第 {chap_idx} 章第 {vid_idx} 个视频...")
-
-            # 点击视频
-            if not handler.click_video_by_index(chap_idx, vid_idx):
-                log(f"点击视频失败，将重新加入队列")
-                tasks.append((chap_idx, vid_idx))
-                time.sleep(2)
-                continue
-
-            time.sleep(4)  # 等待页面刷新
-
-            # 检查是否已完成
-            if handler.is_video_completed():
-                log("该视频已完成，跳过（不重试）")
-                continue
-
-            # 点击播放按钮
-            handler.click_play_button()
-
-            # 启动监控线程
-            handler.start_playback_monitor()
-
-            # 等待完成图片
-            success = handler.wait_for_complete_image(timeout=3600)
-
-            # 停止监控
-            handler.stop_playback_monitor()
-
-            if not success:
-                log("视频播放超时，将重新加入队列")
-                tasks.append((chap_idx, vid_idx))
-
-            time.sleep(1)
-
-        log("\n所有视频已处理完毕")
-
+        # 挂课
+        run_video_task(page,handler,log_callback=log)
     except Exception as e:
         log(f"运行出错: {e}")
     finally:
@@ -110,7 +54,7 @@ def run_video_task_with_ui(launch_func, course_url, log_callback=None, completio
 
 # ================== UI 界面 ==================
 class GuiApp:
-    def __init__(self, root):
+    def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("UCAS慕课挂课工具")
         self.root.geometry("700x650")
@@ -153,14 +97,14 @@ class GuiApp:
         manual_btn = ttk.Radiobutton(mode_frame, text="自动启动", variable=self.launch_mode,
                                     value="manual", command=self.on_mode_change)
         manual_btn.grid(row=0, column=0, sticky=tk.W, padx=5, pady=2)
-        manual_hint = ttk.Label(mode_frame, text="(使用您的用户数据文件夹，程序启动带调试端口的浏览器)")
+        manual_hint = ttk.Label(mode_frame, text="(程序启动带调试端口的浏览器，可选使用您的用户数据文件夹或者使用无痕)")
         manual_hint.grid(row=0, column=1, sticky=tk.W, padx=5)
 
         # 自动启动选项
         auto_btn = ttk.Radiobutton(mode_frame, text="手动启动", variable=self.launch_mode,
                                 value="auto", command=self.on_mode_change)
         auto_btn.grid(row=1, column=0, sticky=tk.W, padx=5, pady=2)
-        auto_hint = ttk.Label(mode_frame, text="(连接已开启调试端口的浏览器)")
+        auto_hint = ttk.Label(mode_frame, text="(连接至已开启调试端口的浏览器)")
         auto_hint.grid(row=1, column=1, sticky=tk.W, padx=5)
 
         # 保存提示标签，备用（如需要高亮，可在此修改样式）
@@ -338,13 +282,21 @@ class GuiApp:
         # 根据启动模式构建启动函数
         mode = self.launch_mode.get()
         if mode == "manual":
-            bt = self.browser_type.get().lower()
+            browser_path = self.browser_path.get().strip()
             if self.incognito_var.get():
+                # 登录回调函数
+                login_event = threading.Event()
+                def login_callback():
+                    def show_dialog():
+                        messagebox.showinfo("登录提示", "请在浏览器中完成登录，然后点击确定继续。")
+                        login_event.set()
+                    self.root.after(0, show_dialog)
+                    login_event.wait()
                 def launch():
-                    return BrowserLauncher.launch_incognito(browser_type=bt)
+                    return BrowserLauncher.launch_incognito(browser_path=browser_path)
             else:
-                browser_path = self.browser_path.get().strip()
                 user_data = self.user_data_dir.get().strip()
+                login_callback = None
                 if not browser_path or not user_data:
                     messagebox.showwarning("警告", "请填写浏览器路径和用户数据目录")
                     return
@@ -373,7 +325,7 @@ class GuiApp:
         # 启动线程
         self.task_thread = threading.Thread(
             target=run_video_task_with_ui,
-            args=(launch, url, self.log, self.task_completed)
+            args=(launch, url, self.log, login_callback,self.task_completed)
         )
         self.task_thread.daemon = True
         self.task_thread.start()

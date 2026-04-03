@@ -21,7 +21,7 @@ class PageConfig:
     COURSE_TREE = "#coursetree"
     # 章节容器
     CHAPTER_CONTAINER = "#coursetree .cells"
-    # 章节标题（用于展开）
+    # 章节标题（用于展开）    暂时没用
     CHAPTER_TITLE = "#coursetree .cells > h3"
     # 视频链接容器
     VIDEO_LINK_CONTAINER = ".ncells a"
@@ -80,9 +80,9 @@ class BrowserLauncher:
         return page
 
     @classmethod
-    def launch_incognito(cls, browser_type='edge', login_callback=None):
+    def launch_incognito(cls, browser_path: str):
         """
-        模式2: 无痕模式启动, 等待登录完成信号\n
+        模式2: 无痕模式启动浏览器\n
         :param browser_type: 浏览器类型
         :param login_callback: 登录回调函数
         """
@@ -94,22 +94,17 @@ class BrowserLauncher:
             incognito_args = ['--incognito']"""
 
         # 使用临时用户数据目录（无痕模式会自动创建临时目录）
+        if browser_path is None:
+            raise ValueError("错误：浏览器路径为空")
         co = ChromiumOptions()
         co.set_local_port(9445)
+        co.set_browser_path(browser_path)
         co.set_argument('--new-window')
         co.incognito(True)
         """for arg in incognito_args:
             co.set_argument(arg)"""
 
         page = ChromiumPage(co)
-
-        print("已启动无痕模式浏览器，请手动登录...")
-        if login_callback:
-            # 等待登录完成信号（如用户输入或事件）
-            login_callback()
-        else:
-            input("登录完成后按回车继续...")
-
         return page
 
     @classmethod
@@ -123,175 +118,166 @@ class BrowserLauncher:
 
 # ================== 课程页面操作处理器 ==================
 class CoursePageHandler:
-    """封装所有与课程页面相关的操作"""
-    def __init__(self, page: ChromiumPage, config: PageConfig):
-        self.page = page
-        self.config = config
-        self.listen_thread = None
-        self.stop_event = None
-
-    def expand_all_chapters(self):
+    @staticmethod
+    def expand_all_chapters(page: ChromiumPage):
         """展开所有章节"""
         js = f"""
-            var chapters = document.querySelectorAll('{self.config.CHAPTER_TITLE}');
+            var chapters = document.querySelectorAll('{PageConfig.CHAPTER_TITLE}');
             for (var i = 0; i < chapters.length; i++) {{
                 chapters[i].click();
             }}
             return chapters.length;
         """
-        count = self.page.run_js(js)
+        count = page.run_js(js)
         print(f"已尝试展开 {count} 个章节")
         time.sleep(0.5)
 
-    def get_chapter_video_counts(self) -> list:
+    @staticmethod
+    def get_chapter_video_counts(page: ChromiumPage) -> list:
         """获取每个章节下的视频数量，返回列表"""
         js = f"""
-            var cellsList = document.querySelectorAll('{self.config.CHAPTER_CONTAINER}');
+            var cellsList = document.querySelectorAll('{PageConfig.CHAPTER_CONTAINER}');
             var counts = [];
             for (var i = 0; i < cellsList.length; i++) {{
-                var videoLinks = cellsList[i].querySelectorAll('{self.config.VIDEO_LINK_CONTAINER}');
+                var videoLinks = cellsList[i].querySelectorAll('{PageConfig.VIDEO_LINK_CONTAINER}');
                 counts.push(videoLinks.length);
             }}
             return counts;
         """
-        return self.page.run_js(js)
+        return page.run_js(js)
 
-    def click_video_by_index(self, chap_index, video_index):
+    @staticmethod
+    def click_video_by_index(page: ChromiumPage, chap_index, video_index):
         """点击指定章节下的指定视频"""
         js = f"""
-            var cellsList = document.querySelectorAll('{self.config.CHAPTER_CONTAINER}');
+            var cellsList = document.querySelectorAll('{PageConfig.CHAPTER_CONTAINER}');
             if (cellsList.length < {chap_index}) return false;
             var targetCells = cellsList[{chap_index - 1}];
-            var videoLinks = targetCells.querySelectorAll('{self.config.VIDEO_LINK_CONTAINER}');
+            var videoLinks = targetCells.querySelectorAll('{PageConfig.VIDEO_LINK_CONTAINER}');
             if (videoLinks.length < {video_index}) return false;
             var targetLink = videoLinks[{video_index - 1}];
             targetLink.click();
             return true;
         """
-        return self.page.run_js(js)
+        return page.run_js(js)
 
-    def is_video_completed(self) -> bool:
+    @staticmethod
+    def is_video_completed(page: ChromiumPage) -> bool:
         """
         判断当前视频是否已完成\n
-        方法为检查是否存在“任务点已完成字样”
+        方法为检查是否存在“任务点已完成”字样
         """
-        icon = self.page.ele(self.config.COMPLETED_ICON, timeout=2)
+        icon = page.ele(PageConfig.COMPLETED_ICON, timeout=2)
         if icon:
             aria_label = icon.attr('aria-label')
             return aria_label == "任务点已完成"
         return False
 
-    def click_play_button(self):
+    @staticmethod
+    def click_play_button(page: ChromiumPage, log_callback:function):
         """点击初始播放按钮"""
         try:
-            play_button = self.page.ele(f"css:{self.config.PLAY_BUTTON}")
+            play_button = page.ele(f"css:{PageConfig.PLAY_BUTTON}")
             if play_button:
                 play_button.click()
-                print("已点击播放按钮")
+                log_callback("已点击播放按钮")
                 return True
             else:
-                print("未找到播放按钮，可能已自动播放")
+                log_callback("未找到播放按钮，可能已自动播放")
                 return False
         except Exception as e:
-            print(f"点击播放按钮异常: {e}")
+            log_callback(f"点击播放按钮异常: {e}")
             return False
 
-    def start_playback_monitor(self):
-        """启动监控线程，检测视频暂停并恢复播放"""
-        self.stop_event = threading.Event()
+    @staticmethod
+    def start_playback_monitor(page: ChromiumPage, log_callback: function, monitor_interval=50):
+        """
+        启动循环监控器，每隔一段事件检测视频是否暂停，若暂停则恢复播放\n
+        :param page: **已经访问**视频页面的Chromiumpage对象
+        :param monitor_interval: 检查时间间隔
+        :return monitor_thread, stop_event: 监控线程, 停止事件
+        """
+        stop_event = threading.Event()
         def monitor():
-            while not self.stop_event.is_set():
+            while not stop_event.is_set():
                 try:
-                    play_btn = self.page.ele(f"css:{self.config.PLAY_PAUSE_CONTROL}", timeout=2)
+                    play_btn = page.ele(f"css:{PageConfig.PLAY_PAUSE_CONTROL}", timeout=2)
                     if play_btn:
                         title = play_btn.attr('title')
                         if title == "播放":
                             play_btn.click()
-                            print("检测到视频暂停，已重新播放")
-                except Exception:
-                    pass
+                            log_callback("检测到视频暂停，已重新播放")
+                except Exception as e:
+                    log_callback(f"错误: {e}")
                 # 分段睡眠以便及时响应停止事件
-                for _ in range(50):
-                    if self.stop_event.is_set():
+                for _ in range(monitor_interval):
+                    if stop_event.is_set():
                         break
                     time.sleep(0.1)
-        self.listen_thread = threading.Thread(target=monitor, daemon=True)
-        self.listen_thread.start()
+        monitor_thread = threading.Thread(
+            target=monitor,
+            name="MonitorThread",
+            daemon=True
+        )
+        monitor_thread.start()
+        return monitor_thread, stop_event
 
-    def stop_playback_monitor(self):
-        """停止监控线程"""
-        if self.stop_event:
-            self.stop_event.set()
-            if self.listen_thread:
-                self.listen_thread.join(timeout=1)
-
-    def wait_for_complete_image(self, timeout=3600):
-        """监听任务完成图片，返回是否成功"""
-        print("等待视频完成图片...")
-        self.page.listen.start(self.config.COMPLETE_IMAGE_KEYWORD)
-        packet = self.page.listen.wait(count=1, timeout=timeout)
-        self.page.listen.stop()
-        if packet and self.config.COMPLETE_IMAGE_KEYWORD in packet.url:
-            print(f"检测到视频完成图片: {packet.url}")
+    @staticmethod
+    def listen_complete_image(page: ChromiumPage, log_callack: function, timeout=3600) -> bool:
+        """监听器：监听任务完成图片，成功截获则设置结束事件"""
+        #print("等待视频完成图片...")
+        page.listen.start(PageConfig.COMPLETE_IMAGE_KEYWORD)
+        packet = page.listen.wait(count=1, timeout=timeout)
+        page.listen.stop()
+        if packet and PageConfig.COMPLETE_IMAGE_KEYWORD in packet.url:
+            log_callack(f"检测到视频完成图片: {packet.url}")
             return True
         else:
-            print("等待超时，未收到完成图片")
+            log_callack("等待超时，未收到完成图片")
             return False
 
 # ================== 主业务函数 ==================
-def run_video_task(launch_func: function, course_url):
+def run_video_task(page: ChromiumPage, handler: CoursePageHandler, log_callback: function=None):
     """
     执行挂课任务的主函数\n
-    :param launch_func: 可调用对象,返回ChromiumPage实例,应为BrowserLauncher下的launch_with_user_data或者launch_incognito
-    :param course_url: 课程视频页面url,为None则提示用户输入
+    :param page: **已经访问**课程链接的ChromiumPage对象,
+    :param handler: 页面处理器，负责视频翻页，播放视频等页面操作,
     """
-    page = launch_func()
-
-    if course_url is None:
-        raise ValueError("错误：课程链接为空")
+    # 日志回调/直接输出到控制台
+    def log(msg):
+        if log_callback is not None:
+            log_callback(msg)
+        else:
+            print(msg)
     
-    # 打开课程页面
-    #course_url = input("请输入课程页面链接：").strip()
-    #if not course_url:
-    #    course_url = "http://mooc.mooc.ucas.edu.cn/mooc-ans/mycourse/studentstudy?chapterId=577476&courseId=350140000037227&clazzid=350140000031973&enc=f1220c4fcaa1db6d27eefea233837606"
-    
-    page.get(course_url)
-    time.sleep(3)
-
-    # 创建页面处理器
-    handler = CoursePageHandler(page, PageConfig)
-
-    # 展开章节
-    # handler.expand_all_chapters()  # 可选，根据页面是否需要展开
-
     # 获取视频数量
-    video_counts = handler.get_chapter_video_counts()
+    video_counts = handler.get_chapter_video_counts(page)
     total_chapters = len(video_counts)
-    print(f"检测到 {total_chapters} 章")
+    log(f"检测到 {total_chapters} 章")
 
     if total_chapters == 0:
-        print("未检测到章节，请检查页面结构")
+        log("未检测到章节，请检查页面结构")
         return
 
     # 构建任务队列
     tasks = deque()
     for chap_idx in range(1, total_chapters + 1):
         video_num = video_counts[chap_idx - 1]
-        print(f"第 {chap_idx} 章共有 {video_num} 个视频")
+        log(f"第 {chap_idx} 章共有 {video_num} 个视频")
         for vid_idx in range(1, video_num + 1):
             tasks.append((chap_idx, vid_idx))
 
-    print(f"总任务数: {len(tasks)}")
-    print("开始处理任务队列...\n")
+    log(f"总任务数: {len(tasks)}")
+    log("开始处理任务队列...\n")
 
     # 处理任务
     while tasks:
         chap_idx, vid_idx = tasks.popleft()
-        print(f"\n正在处理第 {chap_idx} 章第 {vid_idx} 个视频...")
+        log(f"\n正在处理第 {chap_idx} 章第 {vid_idx} 个视频...")
 
         # 点击视频
-        if not handler.click_video_by_index(chap_idx, vid_idx):
-            print(f"点击视频失败，将重新加入队列")
+        if not handler.click_video_by_index(page, chap_idx, vid_idx):
+            log(f"点击视频失败，将重新加入队列")
             tasks.append((chap_idx, vid_idx))
             time.sleep(2)
             continue
@@ -299,33 +285,40 @@ def run_video_task(launch_func: function, course_url):
         time.sleep(4)  # 等待页面刷新
 
         # 检查是否已完成
-        if handler.is_video_completed():
-            print("该视频已完成，跳过")
+        if handler.is_video_completed(page):
+            log("该视频已完成，跳过")
             continue
 
         # 点击播放按钮
-        handler.click_play_button()
+        handler.click_play_button(page, log)
 
-        # 启动监控线程
-        handler.start_playback_monitor()
-
+        # 获取监控线程
+        monitor_thread, stop_event = handler.start_playback_monitor(page,log)
+        
         # 等待完成图片
-        success = handler.wait_for_complete_image(timeout=3600)
+        success = handler.listen_complete_image(page,log)
 
         # 停止监控
-        handler.stop_playback_monitor()
+        stop_event.set()
+        monitor_thread.join()
 
         if not success:
-            print("视频播放超时，等待进行重试")
+            log("视频播放超时，等待进行重试")
             tasks.append((chap_idx, vid_idx))
 
         time.sleep(1)
 
-    print("\n所有视频已处理完毕")
-    input("按回车退出...")
+    log("\n所有视频已处理完毕")
+    if log_callback is None:
+        input("按回车退出...")
 
 if __name__ == "__main__":
-    def default_launch():
-        return BrowserLauncher.launch_with_user_data(browser_type='edge')
-
-    run_video_task(default_launch)
+    page = BrowserLauncher.launch_with_user_data(
+        browser_type='edge',
+        browser_path=utils.get_edge_path(),
+        user_data_dir=utils.get_edge_user_data_dir()
+        )
+    url = input("输入课程链接")
+    page.get(url)
+    handler = CoursePageHandler()
+    run_video_task(page, CoursePageHandler)
