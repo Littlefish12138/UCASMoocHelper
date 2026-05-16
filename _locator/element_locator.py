@@ -66,10 +66,10 @@ class ElementLocator:
     """
     元素定位、获取信息\n
     """
-    def __init__(self, page: ChromiumPage, config: dict, required_set: set):
+    def __init__(self, page: ChromiumPage, config: dict, required_set: set = None):
         self.page = page
         self._config = copy.deepcopy(config)
-        self._required_set = copy.deepcopy(required_set)
+        self._required_set = copy.deepcopy(required_set) if required_set is not None else None
         self._result = {}
         self._container_stack = ContainerStack(self._result)
         self._element_stack = ElementStack(page)
@@ -148,6 +148,7 @@ class ElementLocator:
                     target_info = method
                 return target_info
             except Exception as e:
+                print(f"尝试调用 ChromiumElement 内方法时出现错误：{e}")
                 # TODO 设计报错
                 pass
 
@@ -157,11 +158,10 @@ class ElementLocator:
         使用 locator_method 字典中的查找方法，从 element 的子元素中找出目标元素\n
         返回符合目标的元素列表，没有返回空列表
         """
-
         method_types: list = locator_method['type']
         locators: list = locator_method['locator']
 
-        is_repeatable = 'children' in method_types or 'eles' in method_types
+        is_repeatable = ('children' in method_types) or ('eles' in method_types) or ('s_eles' in method_types)
         is_exist = False
 
         for method_type in method_types:
@@ -169,7 +169,7 @@ class ElementLocator:
                 try:
                     method = getattr(element, method_type)
                     for locator in locators:
-                        child_elements = method(locator)
+                        child_elements = method(locator, timeout = 2)
                         if child_elements:
                             is_exist = True
                             break
@@ -212,24 +212,28 @@ class ElementLocator:
                     if virtual_dict:
                         key = virtual_dict['key']
                         node_virtual_dict = {}
-                        self._container_stack.push(name=key, ref=node_virtual_dict)
-                        
-                        is_container_pushed = True
                         
                         # 更新result，在result_dict下指定位置 **新增** node_virtual_dict
                         container_name = virtual_dict['container']
-                        
                         virtual_container: dict = self._container_stack.resolve(container_name)
                         # 处理新增：字典列表追加
                         if virtual_container.get(key) is None:
+                            # 更新结果
                             virtual_container[key] = [node_virtual_dict]
+                            # 压入栈中
+                            self._container_stack.push(name=key, ref=node_virtual_dict)
+                            is_container_pushed = True
                         elif isinstance(virtual_container.get(key), list):
+                            # 更新结果
                             virtual_container_list: list = virtual_container.get(key)
                             virtual_container_list.append(node_virtual_dict)
+                            # 压入栈中
+                            self._container_stack.push(name=key, ref=node_virtual_dict)
+                            is_container_pushed = True
                         else:
                             # TODO 报错，不允许将原来的信息/方法键覆盖成容器
                             pass
-                    
+
                     # ================3================ 若有 targets 则逐个调用get_targets获取信息
                     targets: dict = node.get('targets')
 
@@ -237,22 +241,19 @@ class ElementLocator:
                         for target_name in targets:
                             target: dict = targets.get(target_name) # 剪枝后其不会是 None
                             target_object = ElementLocator.get_target(child_element, target) # 获取到目标，字符串或者回调函数
-
                             if target_object is not None:
                                 # 目标存在
                                 container_name = target['container']
                                 
                                 target_container: dict = self._container_stack.resolve(container_name) #使用键名从栈中找出对应的容器
-                                
                                 target_key = target['key']
                                 if target_container.get(target_key) is None:
-                                    # TODO 把object存到result下指定容器，指定键处
                                     target_container[target_key] = target_object
                                 else:
                                     # TODO 设计报错，不允许(1)覆盖已有的信息/方法键，(2)覆盖已经存了虚拟容器或者虚拟容器列表的键
                                     pass
-                    
                     # ================4================ 若有 sub_elements 则逐个处理sub_elements
+
                     sub_elements: list = node.get('sub_elements')
                     if sub_elements:
                         for sub_element in sub_elements:
@@ -288,8 +289,7 @@ class ElementLocator:
 
         # 从根节点开始剪枝
         ElementLocator.prune_subtree(self._config, self._required_set)
-
         # 启动递归
         self.process_node(self._config)
-        result = copy.copy(self._result)
-        return result
+        #result = copy.copy(self._result)
+        return self._result
