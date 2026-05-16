@@ -1,0 +1,169 @@
+{
+  "$schema": "file:///f:/coding/临时工具、临时测试/UCAS_MOOC/page_locator.json",
+  "name": "question_root",
+  "description": "整个题目对应的的元素",
+  "locator_method": {
+    "type": ["eles"],
+    "locator": [".TiMu singleQuesId"]
+  },
+  "virtual_dict": {
+    "key": "questions",
+    "container": "$root"
+  },
+  "targets": {
+    "id": {
+      "type": "information",
+      "description": "题目id数值",
+      "container": "questions",
+      "key": "id",
+      "value": {
+        "method": "attr",
+        "args": "data"
+      }
+    }
+  },
+  "sub_elements": [
+    {
+      "name": "stem_parent",
+      "description": "题干父元素",
+      "locator_method": {
+        "type": ["child", "ele"],
+        "locator": [".Zy_TItle clearfix"]
+      },
+      "sub_elements": [
+        {
+          "name": "stem_child",
+          "description": "题干所在位置",
+          "locator_method": {
+            "type": ["child", "ele"],
+            "locator": [
+              ".^clearfix",
+              ".clearfix",
+              ".clearfix font-cxsecret fontLabel"
+            ]
+          },
+          "targets": {
+            "stem": {
+              "type": "information",
+              "description": "题干",
+              "container": "questions",
+              "key": "stem",
+              "value": {
+                "method": "text"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "option_parent",
+      "description": "选项父元素",
+      "locator_method": {
+        "type": ["eles"],
+        "locator": ["tag:li", "@|role=radio@|role=checkbox@|role=option"]
+      },
+      "virtual_dict": {
+        "key": "options",
+        "container": "questions"
+      },
+      "sub_elements": [
+        {
+          "name": "button",
+          "description": "选择时点击的元素",
+          "locator_method": {
+            "type": ["child", "ele"],
+            "locator": ["tag:label"]
+          },
+          "targets": {
+            "click_callback": {
+              "type": "method",
+              "description": "点击回调，点击以选择此选项",
+              "container": "$parent",
+              "key": "click_callback",
+              "method": "click"
+            },
+            "option_name": {
+              "type": "information",
+              "description": "选项名称，为选择题是是A/B/C/D，为判断题时为'对'/'错'",
+              "container": "$parent",
+              "key": "option_name",
+              "value": {
+                "method": "text"
+              }
+            }
+          }
+        },
+        {
+          "name": "option_child",
+          "description": "选项内容",
+          "presence": "optional",
+          "locator_method": {
+            "type": ["ele"],
+            "locator": ["tag:a", "@href^javascript:void(0)"]
+          },
+          "targets": {
+            "option_content": {
+              "type": "information",
+              "description": "选项内容",
+              "container": "options",
+              "key": "content",
+              "value": {
+                "method": "text"
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "my_answer_parent",
+      "description": "我的答案父元素",
+      "locator_method": {
+        "type": ["child", "ele"],
+        "locator": [".Py_answer clearfix"]
+      },
+      "sub_elements": [
+        {
+          "name": "my_answer_child",
+          "description": "我的答案外部的span元素",
+          "locator_method": {
+            "type": ["child", "ele"],
+            "locator": ["tag:span"]
+          },
+          "targets": {
+            "my_answer": {
+              "type": "information",
+              "description": "我的答案",
+              "container": "questions",
+              "key": "myAnswer",
+              "value": {
+                "method": "text"
+              }
+            }
+          }
+        },
+        {
+          "name": "is_answer_correct",
+          "description": "我的答案是否正确",
+          "locator_method": {
+            "type": ["child", "ele"],
+            "locator": ["tag:i", ".^fr"]
+          },
+          "targets": {
+            "is_answer_correct": {
+              "type": "information",
+              "description": "答案是否正确",
+              "container": "questions",
+              "key": "is_correct",
+              "value": {
+                "method": "attr",
+                "args": "aria-label"
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
