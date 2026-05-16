@@ -11,11 +11,11 @@
     "container": "$root"
   },
   "targets": {
-    "id": {
+    "data": {
       "type": "information",
       "description": "题目id数值",
       "container": "questions",
-      "key": "id",
+      "key": "data",
       "value": {
         "method": "attr",
         "args": "data"
