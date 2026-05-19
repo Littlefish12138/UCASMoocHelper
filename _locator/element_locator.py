@@ -66,13 +66,14 @@ class ElementLocator:
     """
     元素定位、获取信息\n
     """
-    def __init__(self, page: ChromiumPage, config: dict, required_set: set = None):
+    def __init__(self, page: ChromiumPage, config: dict, required_set: set = None, timeout = 1):
         self.page = page
         self._config = copy.deepcopy(config)
         self._required_set = copy.deepcopy(required_set) if required_set is not None else None
         self._result = {}
         self._container_stack = ContainerStack(self._result)
         self._element_stack = ElementStack(page)
+        self._timeout = timeout
     
     @staticmethod
     def prune_subtree(node: dict, required_set: set = None) -> bool:
@@ -153,11 +154,12 @@ class ElementLocator:
                 pass
 
     @staticmethod
-    def locate_elements(element, locator_method: dict) -> list:
+    def locate_elements(element, locator_method: dict, timeout) -> list:
         """
         使用 locator_method 字典中的查找方法，从 element 的子元素中找出目标元素\n
         返回符合目标的元素列表，没有返回空列表
         """
+        
         method_types: list = locator_method['type']
         locators: list = locator_method['locator']
 
@@ -169,7 +171,7 @@ class ElementLocator:
                 try:
                     method = getattr(element, method_type)
                     for locator in locators:
-                        child_elements = method(locator, timeout = 2)
+                        child_elements = method(locator, timeout = timeout)
                         if child_elements:
                             is_exist = True
                             break
@@ -197,7 +199,7 @@ class ElementLocator:
 
         # ================1================ 找出满足条件的元素列表
         locator_method: dict = node['locator_method']
-        child_elements: list = ElementLocator.locate_elements(parent_element, locator_method)
+        child_elements: list = ElementLocator.locate_elements(parent_element, locator_method, self._timeout)
 
         if child_elements:
             
