@@ -1,132 +1,188 @@
-# 🎓 UCAS 慕课挂课工具
+# UCAS 慕课挂课工具
 
-> 自动播放视频、监控暂停、翻页刷课，解放双手 ✨
-
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg) ![License](https://img.shields.io/badge/License-MIT-green.svg)
-
-## 📦 项目组成与原理
-
-本工具基于 **DrissionPage** 库（一个整合了 Selenium 和 Requests 优势的浏览器自动化框架），通过 **浏览器远程调试端口** 控制浏览器行为，无需 WebDriver 配置。
-
-- **`course_listener.py`** – 核心业务逻辑
-  - 浏览器启动器（支持普通/无痕/连接已打开的调试浏览器）
-  - 课程页面处理器（章节展开、视频点击、播放状态监控）
-  - 任务队列管理（失败自动重试）
-
-- **`main.py`** – 图形界面（tkinter）
-  - 提供操作面板，支持两种启动模式
-  - 显示运行日志
-
-- **`utils.py`** – 工具函数
-  - 自动从注册表读取 Edge/Chrome 安装路径和默认数据目录
-
-## 🖥️ 系统要求
-
-- **操作系统**：Windows 7 / 10 / 11（32 位或 64 位）
-- **浏览器**：Microsoft Edge 或 Google Chrome
-- **Python**环境：3.8+
-
-## 🎯 适用范围
-
-- 2026年4月份左右mooc的网页端UI。仅处理播放视频的部分，不能处理包括阅读，问卷之类的。
-
-### 🔍 主要工作流程
-
-1. 通过调试端口连接或启动浏览器，打开课程页面
-2. 解析页面章节结构，生成待播放视频任务队列
-3. 依次进入每个视频，检测是否已完成（检查“任务点已完成”字样）
-4. 自动播放视频，并启动后台线程监控暂停状态（如有暂停立即恢复）
-5. 监听网络请求中的完成图片，判定视频播放完毕，切换下一个
+基于 CDP（Chrome DevTools Protocol）的自动化挂课工具，专为中国科学院大学 MOOC 平台设计。
 
 ---
 
-## 🚀 操作方法
+## 组成与实现
 
-### 1️⃣ 输入课程链接
+### 核心技术
 
-在图形界面顶部的输入框中粘贴课程页面的 URL（例如：`http://mooc.ucas.edu.cn/mycourse/studentstudy？chapterId=xxx`）。
+- **CDP 协议控制浏览器**：无需 `drivers.exe`，通过调试端口直接操控 Edge / Chrome。
+- **灵活启动模式**：
+  - 自动启动（指定用户数据目录，可使用登录状态）
+  - 无痕模式启动
+  - 连接已打开调试端口的现有浏览器
+- **配置驱动元素定位**：通过 JSON 声明页面元素的查找方式与数据提取规则，页面结构变化时只需修改配置文件，无需改动核心代码。
 
-### 2️⃣ 选择启动模式
+### 主要类与功能
 
-#### 🤖 自动启动（推荐新手）
+#### `BrowserLauncher`
 
-##### 🔏 使用用户数据目录
+提供三种浏览器启动方式：
 
-- 程序自动使用你的浏览器**用户数据目录**启动一个**带调试端口**的新浏览器实例，你**不必**进行登录
-- 完成后会直接打开课程页面，**无需手动登录**（因为复用了你的登录态）
-- **注意**：若使用 Edge 且采用默认用户数据目录，程序会强制结束当前所有 Edge 进程（避免端口冲突），**请提前保存网页工作并关闭 Edge**。
-- **注意**：Chrome 新版安全策略**不允许**调试默认数据目录，如您使用chrome，请使用非默认数据目录或者使用无痕模式
+- `launch_with_user_data`：使用指定用户数据目录启动
+- `launch_incognito`：无痕模式启动
+- `connect_to_existing`：连接到已开启调试端口的浏览器
 
-##### 🕵️ 无痕模式
+#### `CourseHandler`
 
-- 程序以**无痕窗口**启动浏览器，并先打开课程链接
-- 然后弹出提示框，**你手动完成登录**，点击“确定”后自动开始刷课
+课程任务处理器，封装了以下核心方法：
 
-#### 🔌 手动启动（连接打开调试端口的浏览器）
+| 方法                | 说明                                                                           |
+| ------------------- | ------------------------------------------------------------------------------ |
+| `finish_video`      | 完成单个视频任务：监控视频播放状态，若被暂停自动恢复，直到任务完成或超时。     |
+| `finish_questions`  | 完成单个视频的章节测试题：读取题目配置，匹配答案并自动勾选。                   |
+| `run_course_task`   | 根据 `video_needed` / `question_needed` 参数，批量处理课程树中所有视频及测试。 |
+| `get_all_questions` | 遍历所有章节，抓取全部测试题的题干、选项、正确答案等信息，用于生成答案库。     |
 
-- 适用场景：您**自行**用命令行启动带调试端口的浏览器，再让本工具连接
-- 使用示例（把路径替换成你电脑上的）
+#### `ElementLocator`
 
-  **Edge 示例：**
-
-  ```cmd
-  "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --remote-debugging-port=9222 --user-data-dir="C:\temp\edge_profile"
-  ```
-
-  ```powershell
-  & "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --remote-debugging-port=9222 --user-data-dir="C:\temp\edge_profile"
-  ```
-
-  **Chrome 示例：**
-
-  ```cmd
-  "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\temp\chrome_profile"
-  ```
-
-  ```powershell
-  & "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\temp\chrome_profile"
-  ```
-
-  3. 在工具界面选择“手动启动”，填入端口号（默认 9222），点击“开始挂课”即可
-
-- ⚠️ 由于Google的安全策略，**使用 Chrome 时，不能使用默认的用户数据目录**（如 `--user-data-dir="C:\Users\你的用户名\AppData\Local\Google\Chrome\User Data"`），否则程序无法连接。请务必指定一个**非默认的目录**，或者使用--incognito参数指定无痕模式。
+配置驱动的树形元素查找器。通过 JSON 声明查找路径、数据字段和输出结构，可灵活适配不同页面布局，无需为每个网页单独编写解析代码。
 
 ---
 
-## ⚠️ 风险提示与免责声明
+## 使用范围
 
-### 🔒 远程调试端口有安全风险！
-
-- 开启远程调试端口后，任何能够访问你计算机该端口的程序都可以控制浏览器并读取你的用户数据，可能造成**隐私泄露、账号被盗**等严重后果。
-- **使用建议**：
-  - 仅在刷课时临时开启，完成后关闭浏览器
-  - 使用无痕模式启动，或者指定临时数据目录
-  - 不要在不安全的网络环境（如公共 Wi-Fi）下使用
-  - 手动启动模式下，请确保没有其他恶意软件监听同一端口
-
-### 📜 免责声明
-
-- 本工具**仅供学习交流**，**严禁**用于任何违反课程平台规则、学校规定或国家法律法规的用途。
-- 使用本工具产生的一切后果（包括但不限于账号封禁、成绩无效、法律责任）由使用者自行承担。
-- 作者不鼓励也不支持滥用自动化工具刷课，请合理规划学习时间。
+> 当前 `CourseHandler` 的交互逻辑、判断条件（如“任务点已完成”的检测）是按照 **2025‑2026 秋季大一军事理论课** 的交互逻辑和UI实现的。
+>
+> - 如果课程平台的**交互流程**发生改变（例如按钮位置、点击顺序不同），需要修改 `CourseHandler` 中的对应逻辑。
+> - 如果仅是**HTML 元素的 class / id / 属性**发生变化，只需修改对应的 JSON 配置文件（例如 `question_element.json`、`course_tree_element.json`），无需改动 Python 代码。
 
 ---
 
-## 🛠️ 常见问题
+## 操作方法
 
-**Q: 为什么连接失败**  
-A: 可能有如下原因：(1) 使用默认用户数据目录，但是没有关闭浏览器实例导致占用 (2) 尝试使用chrome的默认数据目录
+### 1. 下载 Release 中的 exe 程序直接运行
 
-**Q: 视频卡在“等待完成图片”一直不动？**  
-A: 可能是网络原因或平台改版。请查看日志窗口，如果长时间无响应，可强制停止后重试。
+已经讲依赖全部打包到单个程序中，直接运行即可。
 
-**Q: 如何停止任务？**  
-A: 停止按钮没有用，因为没有写相关代码。你可以直接把本程序关闭
+### 2. 图形界面
+
+运行 `main.py` 启动 GUI 窗口：
+
+```
+python main.py
+```
+
+- **课程链接**：粘贴课程的视频页面 URL。
+- **启动模式**：
+  - 自动启动：程序自动启动浏览器（可指定用户数据目录或无痕模式）。
+  - 手动启动：连接到你已打开的调试端口浏览器（需先用命令行启动浏览器，如 `chrome.exe --remote-debugging-port=9222`）。
+- **开始挂课**：点击后自动执行任务，日志输出到下方文本框。
+
+### 3. 命令行 / 脚本调用
+
+你可以自行编写调用逻辑，比如：
+
+```python
+from course_listener import BrowserLauncher, CourseHandler
+import json
+
+# 启动浏览器
+page = BrowserLauncher.launch_incognito(browser_path="C:\\...\\msedge.exe")
+page.get("课程URL")
+
+# 加载配置文件
+with open("章节测试json的路径", "r", encoding="utf-8") as f:
+    question_config = json.load(f)
+with open("课程树json的路径", "r", encoding="utf-8") as f:
+    tree_config = json.load(f)
+
+# 创建处理器并运行
+handler = CourseHandler(page, tree_config,
+                        video_needed=True,
+                        question_needed=True,
+                        question_config=question_config,
+                        answers=answer_dict)   # 答案字典可从本地 JSON 加载
+handler.finish_video()
+```
+
+### 3. 答案抓取与制作
+
+使用 `get_all_questions` 方法可自动遍历所有章节的测试题，将结果保存为 JSON 文件。默认结构示意：
+
+```json
+{
+  "46154": {
+    "data": "46154",
+    "stem": "【单选题】国防是阶级斗争的产物,它伴随着()的形成而产生。",
+    "options": [
+      {
+        "name_and_content": "A、 军队"
+      },
+      {
+        "name_and_content": "B、 生产力"
+      },
+      {
+        "name_and_content": "C、 工人与农民"
+      },
+      {
+        "name_and_content": "D、 阶级与国家"
+      }
+    ],
+    "my_answer": "我的答案：D",
+    "is_correct": "答案正确"
+  },
+  "46156": {
+    "data": "46156",
+    "stem": "【判断题】国防为国家和民族提供食物保障,并为国家和民族的利益服务。()",
+    "my_answer": "我的答案：错",
+    "is_correct": "答案正确"
+  }
+}
+```
 
 ---
 
-## 📄 许可证
+## 风险提示
 
-MIT License © 2025
+1. **账号安全**：调试端口开启后，电脑上的**任意程序**都可以连接至该端口并操控浏览器，请务必确保在安全的环境下运行。
+2. **平台更新**：若 MOOC 平台更新前端代码，配置文件可能失效，需要相应调整。
+3. **学习目的**：本工具仅用于技术学习和提高效率，请勿用于恶意刷课或破坏平台公平性。
+4. **法律责任**：使用者自行承担因违规使用而产生的一切后果。
 
-Enjoy your automated learning! 🎉
+---
+
+## 常见问题
+
+### Q1：提示“无法连接到调试端口”怎么办？
+
+- 使用用户数据目录启动时，确保先前没有浏览器实例占用
+- 检查端口号是否冲突
+
+### Q2：网页上一直显示“任务点未完成”？
+
+- 前端渲染有延迟，只要日志中显示播放完成即为后端认为播放完成，该视频已经完成。
+- 如果超时仍未显示检查网络是否稳定，视频能否正常播放。
+- 可能平台的任务完成检测机制发生了变化，需要更新 `PageConfig.COMPLETE_IMAGE_KEYWORD` 或其他定位器。
+
+### Q3：抓取章节测试题时某些选项内容缺失？
+
+- 判断题的选项内容可能存储在 `judgement` 字段而非 `content` 中，配置文件中已做处理。
+- 如果平台修改了选项的 HTML 结构，需要调整 `question_element.json` 中对应的 `locator`。
+
+### Q4：如何修改配置文件以适配其他课程？
+
+- 请阅读 `json配置规范v1.1.md`，按照规范编写对应课程的查找规则。
+- 主要修改两个文件：
+  - `course_tree_element.json`：定义课程左侧目录树的章节、小节及其点击回调。
+  - `question_element.json`：定义每道题的题干、选项、答案区域的位置。
+
+### Q5：报错 `TargetContainerMissingError`？
+
+- 表示 `targets` 中指定的 `container` 在上下文中找不到。检查 `virtual_dict` 的 `key` 命名是否一致，以及 `container` 是否正确指向了祖先容器的名称。
+
+---
+
+## 依赖环境
+
+- Python 3.8+
+- DrissionPage >= 4.0.0
+- Windows（注册表读取路径）或手动指定浏览器路径
+
+安装依赖：
+
+```
+pip install DrissionPage
+```
