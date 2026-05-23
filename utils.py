@@ -4,7 +4,6 @@
 import os
 import winreg
 import subprocess
-import time
 from typing import Optional
 
 from DrissionPage import ChromiumPage, ChromiumOptions
@@ -35,7 +34,7 @@ def _read_registry_value(
     use_32bit: bool = False,
 ) -> Optional[str]:
     """
-    读取注册表指定键值。
+    读取注册表指定键值。\n
     :param hive: 注册表根键，如 winreg.HKEY_LOCAL_MACHINE
     :param subkey: 子键路径
     :param value_name: 值名称，None 表示读默认值
@@ -60,7 +59,7 @@ def _read_registry_value(
 
 def get_browser_path(browser_type: str) -> Optional[str]:
     """
-    获取浏览器的可执行文件路径。
+    获取浏览器的可执行文件路径。\n
     :param browser_type: "chrome" 或 "edge" (大小写不敏感)
     :return: 完整路径字符串，找不到则返回 None
     """
@@ -91,7 +90,7 @@ def get_browser_path(browser_type: str) -> Optional[str]:
 
 def get_user_data_path(browser_type: str) -> Optional[str]:
     """
-    获取浏览器的默认用户数据目录。
+    获取浏览器的默认用户数据目录。\n
     :param browser_type: "chrome" 或 "edge" (大小写不敏感)
     :return: 目录路径字符串，若无法确定则返回 None
     """
@@ -127,52 +126,43 @@ def get_user_data_path(browser_type: str) -> Optional[str]:
     # 即使目录不存在也返回预期路径，方便调用者创建
     return default_path
 
-# ================== 浏览器启动器 ==================
-class BrowserLauncher:
-    """浏览器启动器，支持多种启动模式"""
+# ================== 浏览器启动器函数 ==================
 
-    @staticmethod
-    def kill_browser_process(browser_type='Edge'):
-        """强制结束浏览器进程"""
-        if browser_type == 'edge':
-            subprocess.run(['taskkill', '/F', '/IM', 'msedge.exe'], capture_output=True)
-        elif browser_type == 'chrome':
-            subprocess.run(['taskkill', '/F', '/IM', 'chrome.exe'], capture_output=True)
-
-    @staticmethod
-    def launch_browser(browser_type: str, user_data_dir: str, is_incognito = True, port: int = 9444):
-        browser_type = browser_type.lower()
-
-        co = ChromiumOptions()
-        if browser_type in {'edge', 'chrome'}:
-            co.set_browser_path(get_browser_path(browser_type))
-        else:
-            raise ValueError(f"错误的浏览器类型{browser_type}")
-        
-        if user_data_dir:
-            co.set_user_data_path(user_data_dir)
-        else:
-            if browser_type == 'chrome':
-                raise ValueError("当浏览器类型为chrome时，不允许使用默认数据目录")
-            co.set_user_data_path(get_user_data_path(browser_type))
-
-        co.incognito(is_incognito)
-        co.set_local_port(port)
-
-        page = ChromiumPage(co)
-
-        return page
-
-    @staticmethod
-    def connect_to_port(port: int):
-        try:
-            page = ChromiumPage(port)
-            return page
-        except Exception as e:
-            print(f"浏览器启动失败{e}")
+def kill_browser_process(browser_type='edge'):
+    """强制结束浏览器进程"""
+    if browser_type == 'edge':
+        subprocess.run(['taskkill', '/F', '/IM', 'msedge.exe'], capture_output=True)
+    elif browser_type == 'chrome':
+        subprocess.run(['taskkill', '/F', '/IM', 'chrome.exe'], capture_output=True)
 
 
-# 简单测试（仅当脚本直接运行时执行）
+def launch_browser(browser_type: str, user_data_dir: str = None, is_incognito = True, port: int = 9444):
+    """启动浏览器, 提醒不能使用Chrome的默认数据目录, 当使用Edge的默认数据目录时自动将后台进程结束"""
+    browser_type = browser_type.lower()
+
+    co = ChromiumOptions()
+    if browser_type in {'edge', 'chrome'}:
+        co.set_browser_path(get_browser_path(browser_type))
+    else:
+        raise ValueError(f"错误的浏览器类型{browser_type}")
+    
+    if user_data_dir:
+        co.set_user_data_path(user_data_dir)
+    else:
+        if browser_type == 'chrome':
+            raise ValueError("当浏览器类型为chrome时, 不允许使用默认数据目录")
+        co.set_user_data_path(get_user_data_path(browser_type))
+    
+    if user_data_dir == get_user_data_path(browser_type):
+        kill_browser_process(browser_type)
+
+    co.incognito(is_incognito)
+    co.set_local_port(port)
+
+    page = ChromiumPage(co)
+
+    return page
+
 if __name__ == "__main__":
     print(f"Chrome: {get_browser_path('chrome')}")
     print(f"Edge: {get_browser_path('edge')}")
