@@ -1,0 +1,2286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>794</width>
+    <height>780</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>UCAS MOOC Helper</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+    /* ============================================================ */
+    /*  全局样式表                                                   */
+    /* ============================================================ */
+    QMainWindow {
+        background-color: #F3F4F6;
+    }
+
+    /* ---------- QGroupBox ---------- */
+    QGroupBox {
+        background-color: #FFFFFF;
+        border: 1px solid #E0E3E8;
+        border-radius: 8px;
+        margin-top: 14px;
+        padding: 16px 12px 12px 12px;
+        font-size: 13pt;
+        font-weight: bold;
+        color: #1F2937;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        subcontrol-position: top left;
+        padding: 0 8px;
+        color: #111827;
+    }
+
+    /* ---------- QRadioButton / QCheckBox 文本 ---------- */
+    QRadioButton, QCheckBox {
+        font-size: 10pt;
+        color: #1467ec;
+        spacing: 8px;
+    }
+
+    QRadioButton, QCheckBox {
+        font-size: 10pt;
+        color: #00050d;
+        spacing: 6px;
+    }
+    QRadioButton::indicator, QCheckBox::indicator {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* ---------- QLineEdit ---------- */
+    QLineEdit {
+        border: 1px solid #D1D5DB;
+        border-radius: 4px;
+        padding: 5px 8px;
+        font-size: 10pt;
+        background-color: #FAFBFC;
+        color: #1F2937;
+        selection-background-color: #BFDBFE;
+    }
+    QLineEdit:focus {
+        border: 1px solid #3B82F6;
+        background-color: #FFFFFF;
+    }
+    QLineEdit:disabled {
+        background-color: #E5E7EB;
+        color: #9CA3AF;
+    }
+
+    /* ---------- QToolButton ---------- */
+    QToolButton {
+        border: 1px solid #D1D5DB;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-size: 11pt;
+        background-color: #F9FAFB;
+        color: #374151;
+    }
+    QToolButton:hover {
+        background-color: #E5E7EB;
+        border-color: #9CA3AF;
+    }
+    QToolButton:pressed {
+        background-color: #D1D5DB;
+    }
+
+    /* ---------- QPushButton 通用 ---------- */
+    QPushButton {
+        border: 1px solid #D1D5DB;
+        border-radius: 5px;
+        padding: 6px 16px;
+        font-size: 10pt;
+        background-color: #F9FAFB;
+        color: #374151;
+    }
+    QPushButton:hover {
+        background-color: #E5E7EB;
+    }
+
+    /* ---------- 开始执行按钮 ---------- */
+    QPushButton#startBtn {
+        background-color: #2563EB;
+        color: #FFFFFF;
+        border: none;
+        font-size: 12pt;
+        font-weight: bold;
+        padding: 10px 32px;
+        border-radius: 6px;
+    }
+    QPushButton#startBtn:hover {
+        background-color: #1D4ED8;
+    }
+    QPushButton#startBtn:pressed {
+        background-color: #1E40AF;
+    }
+
+    /* ---------- 折叠按钮 ---------- */
+    QPushButton#toggleLaunchBtn {
+        background: transparent;
+        border: none;
+        color: #3B82F6;
+        font-size: 10pt;
+        font-weight: bold;
+        padding: 4px 0px;
+        text-align: left;
+    }
+    QPushButton#toggleLaunchBtn:hover {
+        color: #1D4ED8;
+    }
+
+    /* ---------- 任务类型 Radio（加粗） ---------- */
+    QRadioButton#completeCourseRadio,
+    QRadioButton#saveQuestionsRadio {
+        font-weight: bold;
+        font-size: 11pt;
+    }
+
+    /* ===== QScrollBar：全局圆角细条 ===== */
+    QScrollBar:vertical {
+        background: transparent;
+        width: 8px;
+        margin: 2px 0 2px 0;
+    }
+    QScrollBar::handle:vertical {
+        background: #D1D5DB;
+        border-radius: 4px;
+        min-height: 30px;
+    }
+    QScrollBar::handle:vertical:hover {
+        background: #9CA3AF;
+    }
+    QScrollBar::handle:vertical:pressed {
+        background: #6B7280;
+    }
+    QScrollBar::add-line:vertical,
+    QScrollBar::sub-line:vertical {
+        height: 0px;
+        background: none;
+        border: none;
+    }
+    QScrollBar::add-page:vertical,
+    QScrollBar::sub-page:vertical {
+        background: none;
+    }
+
+    QScrollBar:horizontal {
+        background: transparent;
+        height: 8px;
+        margin: 0 2px 0 2px;
+    }
+    QScrollBar::handle:horizontal {
+        background: #D1D5DB;
+        border-radius: 4px;
+        min-width: 30px;
+    }
+    QScrollBar::handle:horizontal:hover {
+        background: #9CA3AF;
+    }
+    QScrollBar::handle:horizontal:pressed {
+        background: #6B7280;
+    }
+    QScrollBar::add-line:horizontal,
+    QScrollBar::sub-line:horizontal {
+        width: 0px;
+        background: none;
+        border: none;
+    }
+    QScrollBar::add-page:horizontal,
+    QScrollBar::sub-page:horizontal {
+        background: none;
+    }
+
+    /* ---------- QScrollArea ---------- */
+    QScrollArea {
+        border: none;
+    }
+   </string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="mainOuterLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QSplitter" name="mainSplitter">
+      <property name="orientation">
+       <enum>Qt::Orientation::Horizontal</enum>
+      </property>
+      <property name="handleWidth">
+       <number>3</number>
+      </property>
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QFrame" name="sidebarFrame">
+       <property name="minimumSize">
+        <size>
+         <width>170</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>190</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">
+         QFrame#sidebarFrame {
+             background-color: #1E293B;
+             border-right: 1px solid #334155;
+         }
+         QLabel#sidebarTitle {
+             color: #F1F5F9;
+             font-size: 14pt;
+             font-weight: bold;
+             padding: 20px 14px 16px 14px;
+         }
+         QPushButton#navTaskBtn, QPushButton#navSettingsBtn {
+             color: #CBD5E1;
+             background: transparent;
+             border: none;
+             border-radius: 6px;
+             text-align: left;
+             padding: 9px 14px;
+             margin: 1px 8px;
+             font-size: 11pt;
+             font-weight: 500;
+         }
+         QPushButton#navTaskBtn:hover, QPushButton#navSettingsBtn:hover {
+             background-color: #334155;
+             color: #F1F5F9;
+         }
+         QPushButton#navTaskBtn:checked, QPushButton#navSettingsBtn:checked {
+             background-color: #3B82F6;
+             color: #FFFFFF;
+             font-weight: bold;
+         }
+        </string>
+       </property>
+       <layout class="QVBoxLayout" name="sidebarLayout">
+        <property name="spacing">
+         <number>2</number>
+        </property>
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="sidebarTitle">
+          <property name="text">
+           <string>⚡ UCAS MOOC</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="navTaskBtn">
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="text">
+           <string>  📋  任务</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="navSettingsBtn">
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="text">
+           <string>  ⚙  设置</string>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+          <property name="autoExclusive">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="sidebarSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QStackedWidget" name="contentStack">
+       <property name="styleSheet">
+        <string notr="true">background: transparent;</string>
+       </property>
+       <property name="currentIndex">
+        <number>1</number>
+       </property>
+       <widget class="QWidget" name="taskPage">
+        <property name="styleSheet">
+         <string notr="true">background: transparent;</string>
+        </property>
+        <layout class="QVBoxLayout" name="taskPageLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>6</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QSplitter" name="taskInnerSplitter">
+           <property name="orientation">
+            <enum>Qt::Orientation::Vertical</enum>
+           </property>
+           <property name="handleWidth">
+            <number>4</number>
+           </property>
+           <property name="childrenCollapsible">
+            <bool>false</bool>
+           </property>
+           <widget class="QScrollArea" name="configScrollArea">
+            <property name="frameShape">
+             <enum>QFrame::Shape::NoFrame</enum>
+            </property>
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>581</width>
+               <height>1017</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="leftLayout">
+              <property name="spacing">
+               <number>14</number>
+              </property>
+              <property name="leftMargin">
+               <number>4</number>
+              </property>
+              <property name="topMargin">
+               <number>4</number>
+              </property>
+              <property name="rightMargin">
+               <number>4</number>
+              </property>
+              <property name="bottomMargin">
+               <number>4</number>
+              </property>
+              <item>
+               <widget class="QGroupBox" name="browserGroup">
+                <property name="title">
+                 <string>浏览器启动配置</string>
+                </property>
+                <layout class="QVBoxLayout" name="browserLayout">
+                 <property name="spacing">
+                  <number>12</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="browserSelectLayout">
+                   <property name="spacing">
+                    <number>8</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="edgeCard" native="true">
+                     <property name="styleSheet">
+                      <string notr="true">
+                       QWidget#edgeCard {
+                           background-color: #F8FAFC;
+                           border: 2px solid #E0E3E8;
+                           border-radius: 10px;
+                           padding: 8px;
+                       }
+                       QWidget#edgeCard:hover {
+                           border-color: #3B82F6;
+                           background-color: #EFF6FF;
+                       }
+                      </string>
+                     </property>
+                     <layout class="QVBoxLayout" name="edgeCardLayout">
+                      <property name="spacing">
+                       <number>6</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>6</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>6</number>
+                      </property>
+                      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                       <widget class="QLabel" name="edgeIconLabel">
+                        <property name="minimumSize">
+                         <size>
+                          <width>44</width>
+                          <height>44</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>44</width>
+                          <height>44</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true"/>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="pixmap">
+                         <pixmap>asset/edge-icon.svg</pixmap>
+                        </property>
+                        <property name="scaledContents">
+                         <bool>true</bool>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignmentFlag::AlignCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                       <widget class="QRadioButton" name="edgeRadio">
+                        <property name="styleSheet">
+                         <string notr="true">QRadioButton {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（圆形按钮）基础样式 */
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;          /* 完全圆形 */
+    border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
+    background: #FFFFFF;         /* 内部始终白色 */
+}
+
+/* 悬停效果（边框变色，内部保持白色） */
+QRadioButton::indicator:hover {
+    border-color: #42A5F5;
+    background: #FFFFFF;
+}
+
+/* 选中状态：仅边框变色，内部依然白色 */
+QRadioButton::indicator:checked {
+    border-color: #1976D2;       /* 深蓝色边框 */
+    background: #FFFFFF;         /* 强制内部白色 */
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>Edge</string>
+                        </property>
+                        <property name="checked">
+                         <bool>true</bool>
+                        </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">buttonGroup</string>
+                        </attribute>
+                       </widget>
+                      </item>
+                     </layout>
+                     <zorder>edgeRadio</zorder>
+                     <zorder>edgeIconLabel</zorder>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QWidget" name="chromeCard" native="true">
+                     <property name="styleSheet">
+                      <string notr="true">
+                       QWidget#chromeCard {
+                           background-color: #F8FAFC;
+                           border: 2px solid #E0E3E8;
+                           border-radius: 10px;
+                           padding: 8px;
+                       }
+                       QWidget#chromeCard:hover {
+                           border-color: #3B82F6;
+                           background-color: #EFF6FF;
+                       }
+                      </string>
+                     </property>
+                     <layout class="QVBoxLayout" name="chromeCardLayout">
+                      <property name="spacing">
+                       <number>6</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>6</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>6</number>
+                      </property>
+                      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                       <widget class="QLabel" name="chromeIconLabel">
+                        <property name="minimumSize">
+                         <size>
+                          <width>44</width>
+                          <height>44</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>44</width>
+                          <height>44</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">
+                          
+                          border-radius: 10px;
+                          color: #FFFFFF;
+                          font-size: 18pt;
+                          font-weight: bold;
+                          padding: 0px;
+                         </string>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="pixmap">
+                         <pixmap>asset/chrome-icon.svg</pixmap>
+                        </property>
+                        <property name="scaledContents">
+                         <bool>true</bool>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignmentFlag::AlignCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                       <widget class="QRadioButton" name="chromeRadio">
+                        <property name="styleSheet">
+                         <string notr="true">QRadioButton {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（圆形按钮）基础样式 */
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;          /* 完全圆形 */
+    border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
+    background: #FFFFFF;         /* 内部始终白色 */
+}
+
+/* 悬停效果（边框变色，内部保持白色） */
+QRadioButton::indicator:hover {
+    border-color: #42A5F5;
+    background: #FFFFFF;
+}
+
+/* 选中状态：仅边框变色，内部依然白色 */
+QRadioButton::indicator:checked {
+    border-color: #1976D2;       /* 深蓝色边框 */
+    background: #FFFFFF;         /* 强制内部白色 */
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>Chrome</string>
+                        </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">buttonGroup</string>
+                        </attribute>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QWidget" name="manualCard" native="true">
+                     <property name="styleSheet">
+                      <string notr="true">
+                       QWidget#manualCard {
+                           background-color: #F8FAFC;
+                           border: 2px solid #E0E3E8;
+                           border-radius: 10px;
+                           padding: 8px;
+                       }
+                       QWidget#manualCard:hover {
+                           border-color: #3B82F6;
+                           background-color: #EFF6FF;
+                       }
+                      </string>
+                     </property>
+                     <layout class="QVBoxLayout" name="manualCardLayout">
+                      <property name="spacing">
+                       <number>6</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="topMargin">
+                       <number>6</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>4</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>6</number>
+                      </property>
+                      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                       <widget class="QLabel" name="terminalIconLabel">
+                        <property name="minimumSize">
+                         <size>
+                          <width>44</width>
+                          <height>44</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>44</width>
+                          <height>44</height>
+                         </size>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">
+                          
+                          border-radius: 10px;
+                          color: #10B981;
+                          font-size: 16pt;
+                          font-weight: bold;
+                          padding: 0px;
+                          font-family: &quot;Consolas&quot;, &quot;Courier New&quot;, monospace;
+                         </string>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="pixmap">
+                         <pixmap>asset/powershell-icon.svg</pixmap>
+                        </property>
+                        <property name="scaledContents">
+                         <bool>true</bool>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignmentFlag::AlignCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+                       <widget class="QRadioButton" name="manualRadio">
+                        <property name="styleSheet">
+                         <string notr="true">QRadioButton {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（圆形按钮）基础样式 */
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;          /* 完全圆形 */
+    border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
+    background: #FFFFFF;         /* 内部始终白色 */
+}
+
+/* 悬停效果（边框变色，内部保持白色） */
+QRadioButton::indicator:hover {
+    border-color: #42A5F5;
+    background: #FFFFFF;
+}
+
+/* 选中状态：仅边框变色，内部依然白色 */
+QRadioButton::indicator:checked {
+    border-color: #1976D2;       /* 深蓝色边框 */
+    background: #FFFFFF;         /* 强制内部白色 */
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>手动启动</string>
+                        </property>
+                        <attribute name="buttonGroup">
+                         <string notr="true">buttonGroup</string>
+                        </attribute>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item alignment="Qt::AlignmentFlag::AlignLeft">
+                  <widget class="QCheckBox" name="incognitoCheckBox">
+                   <property name="styleSheet">
+                    <string notr="true">QCheckBox {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, &quot;PingFang SC&quot;, sans-serif;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（复选框）基础样式 */
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;          /* 圆角值，可调 */
+    border: 2px solid #B0BEC5;
+    background-color: #FFFFFF;
+}
+
+/* 悬停效果 */
+QCheckBox::indicator:hover {
+    border-color: #42A5F5;
+    background-color: #E3F2FD;
+}
+
+/* 选中状态：背景填充主色，边框同色，无额外图标 */
+QCheckBox::indicator:checked {
+    border-color: #1976D2;
+    background-color: #1976D2;
+}
+
+/* 禁用状态（可选） */
+QCheckBox::indicator:disabled {
+    border-color: #D1D5DB;
+    background-color: #F3F4F6;
+}
+QCheckBox:disabled {
+    color: #9CA3AF;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>无痕模式 (Incognito)</string>
+                   </property>
+                   <property name="checked">
+                    <bool>false</bool>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="toggleLaunchBtn">
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="text">
+                    <string>▼  启动选项</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="launchOptionsFrame">
+                   <property name="styleSheet">
+                    <string notr="true">
+                     QFrame#launchOptionsFrame {
+                         background-color: #F9FAFB;
+                         border: 1px solid #E5E7EB;
+                         border-radius: 6px;
+                         padding: 8px;
+                     }
+                    </string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Shape::StyledPanel</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="launchOptsLayout">
+                    <property name="spacing">
+                     <number>10</number>
+                    </property>
+                    <item>
+                     <layout class="QHBoxLayout" name="browserPathLayout">
+                      <property name="spacing">
+                       <number>6</number>
+                      </property>
+                      <item>
+                       <widget class="QLabel" name="browserPathLabel">
+                        <property name="minimumSize">
+                         <size>
+                          <width>90</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>浏览器路径</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="browserPathEdit">
+                        <property name="placeholderText">
+                         <string>自动检测或手动输入浏览器可执行文件路径...</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QToolButton" name="browserPathBrowseBtn">
+                        <property name="cursor">
+                         <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="toolTip">
+                         <string>浏览选择浏览器可执行文件</string>
+                        </property>
+                        <property name="text">
+                         <string>⋯</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="userDataPathLayout">
+                      <property name="spacing">
+                       <number>6</number>
+                      </property>
+                      <item>
+                       <widget class="QLabel" name="userDataPathLabel">
+                        <property name="minimumSize">
+                         <size>
+                          <width>90</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>用户数据路径</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="userDataPathEdit">
+                        <property name="placeholderText">
+                         <string>自动检测或手动输入用户数据目录...</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QToolButton" name="userDataPathBrowseBtn">
+                        <property name="cursor">
+                         <cursorShape>PointingHandCursor</cursorShape>
+                        </property>
+                        <property name="toolTip">
+                         <string>浏览选择用户数据目录</string>
+                        </property>
+                        <property name="text">
+                         <string>⋯</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="portLayout">
+                      <property name="spacing">
+                       <number>6</number>
+                      </property>
+                      <item>
+                       <widget class="QLabel" name="portLabel">
+                        <property name="minimumSize">
+                         <size>
+                          <width>90</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>端口</string>
+                        </property>
+                        <property name="alignment">
+                         <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="portEdit">
+                        <property name="inputMask">
+                         <string>00000</string>
+                        </property>
+                        <property name="text">
+                         <string>9444</string>
+                        </property>
+                        <property name="placeholderText">
+                         <string>9444</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="portSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Orientation::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="courseTaskGroup">
+                <property name="title">
+                 <string>课程任务配置</string>
+                </property>
+                <layout class="QVBoxLayout" name="courseTaskLayout">
+                 <property name="spacing">
+                  <number>12</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="courseLinkLayout">
+                   <property name="spacing">
+                    <number>6</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="courseLinkLabel">
+                     <property name="minimumSize">
+                      <size>
+                       <width>70</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>课程链接</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="courseLinkEdit">
+                     <property name="placeholderText">
+                      <string>输入课程视频页面的完整 URL...</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="taskTypeLabel">
+                   <property name="styleSheet">
+                    <string notr="true">font-weight: bold; color: #374151; margin-top: 4px;</string>
+                   </property>
+                   <property name="text">
+                    <string>任务类型</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="completeCourseFrame">
+                   <property name="styleSheet">
+                    <string notr="true">
+                     QFrame#completeCourseFrame {
+                         background-color: #F0F9FF;
+                         border: 1px solid #BAE6FD;
+                         border-radius: 8px;
+                         padding: 10px;
+                     }
+                    </string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Shape::StyledPanel</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="completeCourseLayout">
+                    <property name="spacing">
+                     <number>8</number>
+                    </property>
+                    <item>
+                     <widget class="QRadioButton" name="completeCourseRadio">
+                      <property name="styleSheet">
+                       <string notr="true">QRadioButton {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（圆形按钮）基础样式 */
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;          /* 完全圆形 */
+    border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
+    background: #FFFFFF;         /* 内部始终白色 */
+}
+
+/* 悬停效果（边框变色，内部保持白色） */
+QRadioButton::indicator:hover {
+    border-color: #42A5F5;
+    background: #FFFFFF;
+}
+
+/* 选中状态：仅边框变色，内部依然白色 */
+QRadioButton::indicator:checked {
+    border-color: #1976D2;       /* 深蓝色边框 */
+    background: #FFFFFF;         /* 强制内部白色 */
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>完成课程</string>
+                      </property>
+                      <property name="checked">
+                       <bool>true</bool>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup_2</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="completeSubOptsLayout">
+                      <property name="spacing">
+                       <number>20</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>28</number>
+                      </property>
+                      <item>
+                       <widget class="QCheckBox" name="watchVideoCheckBox">
+                        <property name="styleSheet">
+                         <string notr="true">QCheckBox {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, &quot;PingFang SC&quot;, sans-serif;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（复选框）基础样式 */
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;          /* 圆角值，可调 */
+    border: 2px solid #B0BEC5;
+    background-color: #FFFFFF;
+}
+
+/* 悬停效果 */
+QCheckBox::indicator:hover {
+    border-color: #42A5F5;
+    background-color: #E3F2FD;
+}
+
+/* 选中状态：背景填充主色，边框同色，无额外图标 */
+QCheckBox::indicator:checked {
+    border-color: #1976D2;
+    background-color: #1976D2;
+}
+
+/* 禁用状态（可选） */
+QCheckBox::indicator:disabled {
+    border-color: #D1D5DB;
+    background-color: #F3F4F6;
+}
+QCheckBox:disabled {
+    color: #9CA3AF;
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>观看视频</string>
+                        </property>
+                        <property name="checked">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QCheckBox" name="completeQuizCheckBox">
+                        <property name="styleSheet">
+                         <string notr="true">QCheckBox {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, &quot;PingFang SC&quot;, sans-serif;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（复选框）基础样式 */
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;          /* 圆角值，可调 */
+    border: 2px solid #B0BEC5;
+    background-color: #FFFFFF;
+}
+
+/* 悬停效果 */
+QCheckBox::indicator:hover {
+    border-color: #42A5F5;
+    background-color: #E3F2FD;
+}
+
+/* 选中状态：背景填充主色，边框同色，无额外图标 */
+QCheckBox::indicator:checked {
+    border-color: #1976D2;
+    background-color: #1976D2;
+}
+
+/* 禁用状态（可选） */
+QCheckBox::indicator:disabled {
+    border-color: #D1D5DB;
+    background-color: #F3F4F6;
+}
+QCheckBox:disabled {
+    color: #9CA3AF;
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>完成章节测试题</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QCheckBox" name="onlyUnfinishedCheck1">
+                        <property name="styleSheet">
+                         <string notr="true">QCheckBox {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, &quot;PingFang SC&quot;, sans-serif;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（复选框）基础样式 */
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;          /* 圆角值，可调 */
+    border: 2px solid #B0BEC5;
+    background-color: #FFFFFF;
+}
+
+/* 悬停效果 */
+QCheckBox::indicator:hover {
+    border-color: #42A5F5;
+    background-color: #E3F2FD;
+}
+
+/* 选中状态：背景填充主色，边框同色，无额外图标 */
+QCheckBox::indicator:checked {
+    border-color: #1976D2;
+    background-color: #1976D2;
+}
+
+/* 禁用状态（可选） */
+QCheckBox::indicator:disabled {
+    border-color: #D1D5DB;
+    background-color: #F3F4F6;
+}
+QCheckBox:disabled {
+    color: #9CA3AF;
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>仅未完成</string>
+                        </property>
+                        <property name="checked">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QFrame" name="saveQuestionsFrame">
+                   <property name="styleSheet">
+                    <string notr="true">
+                     QFrame#saveQuestionsFrame {
+                         background-color: #F0FDF4;
+                         border: 1px solid #BBF7D0;
+                         border-radius: 8px;
+                         padding: 10px;
+                     }
+                    </string>
+                   </property>
+                   <property name="frameShape">
+                    <enum>QFrame::Shape::StyledPanel</enum>
+                   </property>
+                   <layout class="QVBoxLayout" name="saveQuestionsLayout">
+                    <property name="spacing">
+                     <number>8</number>
+                    </property>
+                    <item>
+                     <widget class="QRadioButton" name="saveQuestionsRadio">
+                      <property name="styleSheet">
+                       <string notr="true">QRadioButton {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（圆形按钮）基础样式 */
+QRadioButton::indicator {
+    width: 14px;
+    height: 14px;
+    border-radius: 7px;          /* 完全圆形 */
+    border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
+    background: #FFFFFF;         /* 内部始终白色 */
+}
+
+/* 悬停效果（边框变色，内部保持白色） */
+QRadioButton::indicator:hover {
+    border-color: #42A5F5;
+    background: #FFFFFF;
+}
+
+/* 选中状态：仅边框变色，内部依然白色 */
+QRadioButton::indicator:checked {
+    border-color: #1976D2;       /* 深蓝色边框 */
+    background: #FFFFFF;         /* 强制内部白色 */
+}</string>
+                      </property>
+                      <property name="text">
+                       <string>保存所有章节测试题</string>
+                      </property>
+                      <attribute name="buttonGroup">
+                       <string notr="true">buttonGroup_2</string>
+                      </attribute>
+                     </widget>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="saveSubOptsLayout">
+                      <property name="spacing">
+                       <number>20</number>
+                      </property>
+                      <property name="leftMargin">
+                       <number>28</number>
+                      </property>
+                      <item>
+                       <widget class="QCheckBox" name="onlyUnfinishedCheck2">
+                        <property name="styleSheet">
+                         <string notr="true">QCheckBox {
+    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;, &quot;PingFang SC&quot;, sans-serif;
+    font-size: 14px;
+    spacing: 8px;
+    color: #2C3E50;
+    background: transparent;
+}
+
+/* 指示器（复选框）基础样式 */
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 6px;          /* 圆角值，可调 */
+    border: 2px solid #B0BEC5;
+    background-color: #FFFFFF;
+}
+
+/* 悬停效果 */
+QCheckBox::indicator:hover {
+    border-color: #42A5F5;
+    background-color: #E3F2FD;
+}
+
+/* 选中状态：背景填充主色，边框同色，无额外图标 */
+QCheckBox::indicator:checked {
+    border-color: #1976D2;
+    background-color: #1976D2;
+}
+
+/* 禁用状态（可选） */
+QCheckBox::indicator:disabled {
+    border-color: #D1D5DB;
+    background-color: #F3F4F6;
+}
+QCheckBox:disabled {
+    color: #9CA3AF;
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>仅未完成</string>
+                        </property>
+                        <property name="checked">
+                         <bool>true</bool>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="startBtn">
+                   <property name="minimumSize">
+                    <size>
+                     <width>180</width>
+                     <height>42</height>
+                    </size>
+                   </property>
+                   <property name="cursor">
+                    <cursorShape>PointingHandCursor</cursorShape>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">QPushButton#startBtn {
+    background-color: #2563EB;   /* 明亮蓝色 */
+    color: #FFFFFF;              /* 白色文字 */
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px 24px;
+    border-radius: 8px;
+}
+
+QPushButton#startBtn:hover {
+    background-color: #1D4ED8;   /* 悬停时深一点 */
+}
+
+QPushButton#startBtn:pressed {
+    background-color: #1E40AF;   /* 按下时更深 */
+    padding-top: 11px;           /* 轻微下沉效果（可选） */
+    padding-bottom: 9px;
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>▶  开 始 执 行</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <widget class="QGroupBox" name="finderGroup">
+                <property name="title">
+                 <string>查找器配置</string>
+                </property>
+                <layout class="QVBoxLayout" name="finderLayout">
+                 <property name="spacing">
+                  <number>12</number>
+                 </property>
+                 <item>
+                  <layout class="QHBoxLayout" name="pageConfigLayout">
+                   <property name="spacing">
+                    <number>6</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="pageConfigLabel">
+                     <property name="minimumSize">
+                      <size>
+                       <width>100</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="styleSheet">
+                      <string notr="true">color: #DC2626; font-weight: bold;</string>
+                     </property>
+                     <property name="text">
+                      <string>页面配置 JSON *</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="pageConfigEdit">
+                     <property name="placeholderText">
+                      <string>必填 — 选择页面配置 JSON 文件...</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="pageConfigBrowseBtn">
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
+                     <property name="toolTip">
+                      <string>选择页面配置 JSON 文件</string>
+                     </property>
+                     <property name="text">
+                      <string>⋯</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="answerConfigLayout">
+                   <property name="spacing">
+                    <number>6</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="answerConfigLabel">
+                     <property name="minimumSize">
+                      <size>
+                       <width>100</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>答案 JSON</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="answerConfigEdit">
+                     <property name="placeholderText">
+                      <string>完成章节测试题时必填 — 课程答案 JSON 文件...</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="answerConfigBrowseBtn">
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
+                     <property name="toolTip">
+                      <string>选择答案 JSON 文件</string>
+                     </property>
+                     <property name="text">
+                      <string>⋯</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <layout class="QHBoxLayout" name="savePathLayout">
+                   <property name="spacing">
+                    <number>6</number>
+                   </property>
+                   <item>
+                    <widget class="QLabel" name="savePathLabel">
+                     <property name="minimumSize">
+                      <size>
+                       <width>100</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>结果保存路径</string>
+                     </property>
+                     <property name="alignment">
+                      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLineEdit" name="savePathEdit">
+                     <property name="placeholderText">
+                      <string>保存所有章节测试题时必填 — 结果保存路径...</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QToolButton" name="savePathBrowseBtn">
+                     <property name="cursor">
+                      <cursorShape>PointingHandCursor</cursorShape>
+                     </property>
+                     <property name="toolTip">
+                      <string>选择保存目录</string>
+                     </property>
+                     <property name="text">
+                      <string>⋯</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
+               <spacer name="leftBottomSpacer">
+                <property name="orientation">
+                 <enum>Qt::Orientation::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+           <widget class="QGroupBox" name="logGroup">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>200</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">
+              QGroupBox#logGroup {
+                  background-color: #1E1E1E;
+                  border: 1px solid #333333;
+                  border-radius: 8px;
+                  margin-top: 14px;
+                  padding: 16px 10px 10px 10px;
+                  font-size: 13pt;
+                  font-weight: bold;
+                  color: #CCCCCC;
+              }
+              QGroupBox#logGroup::title {
+                  subcontrol-origin: margin;
+                  subcontrol-position: top left;
+                  padding: 0 8px;
+                  color: #CCCCCC;
+                  background: #1E1E1E;
+              }
+              /* 日志区内部滚动条覆盖为暗色 */
+              QGroupBox#logGroup QScrollBar:vertical {
+                  background: #2D2D2D;
+                  width: 8px;
+                  margin: 2px 0 2px 0;
+              }
+              QGroupBox#logGroup QScrollBar::handle:vertical {
+                  background: #555555;
+                  border-radius: 4px;
+                  min-height: 30px;
+              }
+              QGroupBox#logGroup QScrollBar::handle:vertical:hover {
+                  background: #777777;
+              }
+              QGroupBox#logGroup QScrollBar::add-line:vertical,
+              QGroupBox#logGroup QScrollBar::sub-line:vertical {
+                  height: 0px;
+                  background: none;
+                  border: none;
+              }
+              QGroupBox#logGroup QScrollBar::add-page:vertical,
+              QGroupBox#logGroup QScrollBar::sub-page:vertical {
+                  background: none;
+              }
+              QGroupBox#logGroup QScrollBar:horizontal {
+                  background: #2D2D2D;
+                  height: 8px;
+                  margin: 0 2px 0 2px;
+              }
+              QGroupBox#logGroup QScrollBar::handle:horizontal {
+                  background: #555555;
+                  border-radius: 4px;
+                  min-width: 30px;
+              }
+              QGroupBox#logGroup QScrollBar::handle:horizontal:hover {
+                  background: #777777;
+              }
+              QGroupBox#logGroup QScrollBar::add-line:horizontal,
+              QGroupBox#logGroup QScrollBar::sub-line:horizontal {
+                  width: 0px;
+                  background: none;
+                  border: none;
+              }
+              QGroupBox#logGroup QScrollBar::add-page:horizontal,
+              QGroupBox#logGroup QScrollBar::sub-page:horizontal {
+                  background: none;
+              }
+             </string>
+            </property>
+            <property name="title">
+             <string>运行日志</string>
+            </property>
+            <layout class="QVBoxLayout" name="logGroupLayout">
+             <property name="spacing">
+              <number>8</number>
+             </property>
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>18</number>
+             </property>
+             <property name="rightMargin">
+              <number>10</number>
+             </property>
+             <property name="bottomMargin">
+              <number>8</number>
+             </property>
+             <item>
+              <layout class="QHBoxLayout" name="logToolbarLayout">
+               <property name="spacing">
+                <number>8</number>
+               </property>
+               <item>
+                <widget class="QLabel" name="logLevelLabel">
+                 <property name="styleSheet">
+                  <string notr="true">color: #BBBBBB; font-size: 10pt; background: transparent;</string>
+                 </property>
+                 <property name="text">
+                  <string>日志等级:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="logLevelCombo">
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">
+                   QComboBox {
+                       border: 1px solid #555555;
+                       border-radius: 3px;
+                       padding: 3px 8px;
+                       font-size: 10pt;
+                       background: #2D2D2D;
+                       color: #D4D4D4;
+                   }
+                   QComboBox:hover {
+                       border-color: #888888;
+                   }
+                   QComboBox QAbstractItemView {
+                       background: #2D2D2D;
+                       color: #D4D4D4;
+                       selection-background-color: #3D3D3D;
+                       border: 1px solid #555555;
+                   }
+                   QComboBox::drop-down {
+                       border: none;
+                   }
+                  </string>
+                 </property>
+                 <property name="currentIndex">
+                  <number>2</number>
+                 </property>
+                 <item>
+                  <property name="text">
+                   <string>CRITICAL</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>WARNING</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>INFO</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>DEBUG</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <spacer name="logToolbarSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Orientation::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QPushButton" name="clearLogBtn">
+                 <property name="maximumSize">
+                  <size>
+                   <width>56</width>
+                   <height>24</height>
+                  </size>
+                 </property>
+                 <property name="cursor">
+                  <cursorShape>PointingHandCursor</cursorShape>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">
+                   font-size: 9pt; padding: 2px 8px;
+                   border: 1px solid #555555;
+                   border-radius: 3px;
+                   background-color: #2D2D2D;
+                   color: #BBBBBB;
+                  </string>
+                 </property>
+                 <property name="text">
+                  <string>清空</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPlainTextEdit" name="logTextEdit">
+               <property name="font">
+                <font>
+                 <family>Consolas</family>
+                 <pointsize>10</pointsize>
+                 <italic>false</italic>
+                 <bold>false</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">
+                 QPlainTextEdit {
+                     background-color: #0C0C0C;
+                     color: #F0F0F0;
+                     border: 1px solid #333333;
+                     border-radius: 4px;
+                     padding: 8px;
+                     selection-background-color: #264F78;
+                     selection-color: #FFFFFF;
+                 }
+                </string>
+               </property>
+               <property name="undoRedoEnabled">
+                <bool>false</bool>
+               </property>
+               <property name="lineWrapMode">
+                <enum>QPlainTextEdit::LineWrapMode::NoWrap</enum>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+               <property name="placeholderText">
+                <string>程序运行日志将在此显示...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="settingsPage">
+        <property name="styleSheet">
+         <string notr="true">background: transparent;</string>
+        </property>
+        <layout class="QVBoxLayout" name="settingsPageLayout">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>6</number>
+         </property>
+         <property name="topMargin">
+          <number>6</number>
+         </property>
+         <property name="rightMargin">
+          <number>6</number>
+         </property>
+         <property name="bottomMargin">
+          <number>6</number>
+         </property>
+         <item>
+          <widget class="QScrollArea" name="settingsScrollArea">
+           <property name="frameShape">
+            <enum>QFrame::Shape::NoFrame</enum>
+           </property>
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="settingsContent">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>589</width>
+              <height>715</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="settingsContentLayout">
+             <property name="spacing">
+              <number>16</number>
+             </property>
+             <property name="leftMargin">
+              <number>8</number>
+             </property>
+             <property name="topMargin">
+              <number>8</number>
+             </property>
+             <property name="rightMargin">
+              <number>8</number>
+             </property>
+             <property name="bottomMargin">
+              <number>8</number>
+             </property>
+             <item>
+              <widget class="QLabel" name="settingsHeaderLabel">
+               <property name="styleSheet">
+                <string notr="true">font-size: 16pt; font-weight: bold; color: #111827; background: transparent; padding: 4px 0;</string>
+               </property>
+               <property name="text">
+                <string>⚙  程序设置</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QGroupBox" name="settingsGroup">
+               <property name="title">
+                <string>运行时参数</string>
+               </property>
+               <layout class="QVBoxLayout" name="settingsGroupLayout">
+                <property name="spacing">
+                 <number>14</number>
+                </property>
+                <item>
+                 <layout class="QVBoxLayout" name="listenTimeoutVLayout">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <layout class="QHBoxLayout" name="listenTimeoutRowLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="listenTimeoutLabel">
+                      <property name="minimumSize">
+                       <size>
+                        <width>200</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #374151;</string>
+                      </property>
+                      <property name="text">
+                       <string>监听视频完成超时时间</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="listenTimeoutEdit">
+                      <property name="text">
+                       <string>3600</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignRight</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="listenTimeoutUnit">
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #6B7280;</string>
+                      </property>
+                      <property name="text">
+                       <string>秒</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="listenTimeoutHint">
+                    <property name="styleSheet">
+                     <string notr="true">font-size: 9pt; color: #9CA3AF; font-style: italic; margin-left: 20px;</string>
+                    </property>
+                    <property name="text">
+                     <string>超时视为视频播放异常，应当设置为比所有视频的最长时间长</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="completeImageKwVLayout">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <layout class="QHBoxLayout" name="completeImageKwRowLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="completeImageKwLabel">
+                      <property name="minimumSize">
+                       <size>
+                        <width>200</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #374151;</string>
+                      </property>
+                      <property name="text">
+                       <string>任务已完成图片请求URL关键字</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="completeImageKwEdit">
+                      <property name="text">
+                       <string>job-status-new-complete</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="completeImageKwHint">
+                    <property name="styleSheet">
+                     <string notr="true">font-size: 9pt; color: #9CA3AF; font-style: italic; margin-left: 20px;</string>
+                    </property>
+                    <property name="text">
+                     <string>视频播放完成时，向后端请求&quot;任务已完成&quot;图片的URL关键字</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="pageLoadTimeoutVLayout">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <layout class="QHBoxLayout" name="pageLoadTimeoutRowLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="pageLoadTimeoutLabel">
+                      <property name="minimumSize">
+                       <size>
+                        <width>200</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #374151;</string>
+                      </property>
+                      <property name="text">
+                       <string>页面加载超时时间</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="pageLoadTimeoutEdit">
+                      <property name="text">
+                       <string>10</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignRight</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="pageLoadTimeoutUnit">
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #6B7280;</string>
+                      </property>
+                      <property name="text">
+                       <string>秒</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="pageLoadTimeoutHint">
+                    <property name="styleSheet">
+                     <string notr="true">font-size: 9pt; color: #9CA3AF; font-style: italic; margin-left: 20px;</string>
+                    </property>
+                    <property name="text">
+                     <string>等待页面上 iframe 元素加载完成的时间，网络不畅可适当调大</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="locateTimeoutVLayout">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <layout class="QHBoxLayout" name="locateTimeoutRowLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="locateTimeoutLabel">
+                      <property name="minimumSize">
+                       <size>
+                        <width>200</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #374151;</string>
+                      </property>
+                      <property name="text">
+                       <string>元素查找超时时间</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="locateTimeoutEdit">
+                      <property name="text">
+                       <string>1</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignRight</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="locateTimeoutUnit">
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #6B7280;</string>
+                      </property>
+                      <property name="text">
+                       <string>秒</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="locateTimeoutHint">
+                    <property name="styleSheet">
+                     <string notr="true">font-size: 9pt; color: #9CA3AF; font-style: italic; margin-left: 20px;</string>
+                    </property>
+                    <property name="text">
+                     <string>定位页面上元素的超时时间，不必太大</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="interactionWaitVLayout">
+                  <property name="spacing">
+                   <number>0</number>
+                  </property>
+                  <item>
+                   <layout class="QHBoxLayout" name="interactionWaitRowLayout">
+                    <property name="spacing">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="interactionWaitLabel">
+                      <property name="minimumSize">
+                       <size>
+                        <width>200</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #374151;</string>
+                      </property>
+                      <property name="text">
+                       <string>页面交互等待时间</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="interactionWaitEdit">
+                      <property name="text">
+                       <string>2</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignmentFlag::AlignRight</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="interactionWaitUnit">
+                      <property name="styleSheet">
+                       <string notr="true">font-size: 10pt; color: #6B7280;</string>
+                      </property>
+                      <property name="text">
+                       <string>秒</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="interactionWaitHint">
+                    <property name="styleSheet">
+                     <string notr="true">font-size: 9pt; color: #9CA3AF; font-style: italic; margin-left: 20px;</string>
+                    </property>
+                    <property name="text">
+                     <string>进行交互操作（如点击元素、执行 js）后的等待时间，页面卡顿可适当调大</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+               </layout>
+              </widget>
+             </item>
+             <item>
+              <spacer name="settingsBottomSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>794</width>
+     <height>33</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>文件(&amp;F)</string>
+    </property>
+    <addaction name="actionLoadConfig"/>
+    <addaction name="actionSaveConfig"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>帮助(&amp;H)</string>
+    </property>
+    <addaction name="actionAbout"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionLoadConfig">
+   <property name="text">
+    <string>加载配置...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSaveConfig">
+   <property name="text">
+    <string>保存配置...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>退出</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>关于</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
+</ui>
