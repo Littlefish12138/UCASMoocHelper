@@ -3,8 +3,16 @@ import copy
 from functools import partial
 from typing import Any
 from dataclasses import dataclass
+import logging
 
 from DrissionPage import ChromiumPage
+from DrissionPage.errors import ElementLostError, ElementNotFoundError
+
+# 报错类
+class KeyNameConflict(Exception):
+    def __init__(self, *args):
+        super().__init__("配置json文件错误: 键名冲突\n",*args)
+
 
 @dataclass
 class StackFrame:
@@ -59,6 +67,7 @@ class ElementStack:
             raise RuntimeError("错误使用：禁止弹出根栈")
         return self._stack.pop()
     
+    @property
     def top(self):
         """查看栈顶帧"""
         return self._stack[-1]
@@ -67,7 +76,11 @@ class ElementLocator:
     """
     元素定位、获取信息\n
     """
-    def __init__(self, page: ChromiumPage, config: dict, load_timeout = 10, locate_timeout = 1):
+    def __init__(self, page: ChromiumPage,
+                  config: dict, *,
+                  logger: logging.Logger = None, 
+                  load_timeout = 10, 
+                  locate_timeout = 1):
         """
         :param config: 页面配置(字典)
         :param load_timeout: 等待iframe元素加载的超时时间
@@ -75,11 +88,13 @@ class ElementLocator:
         """
         self.page = page
         self._config = copy.deepcopy(config)
+        self.logger = logger if logger else logging.getLogger(__name__)
         self._load_timeout = load_timeout
         self._locate_timeout = locate_timeout
         self._result = {}
         self._element_stack = ElementStack(self.page)
         self._container_stack = ContainerStack(self._result)
+        
     
     @staticmethod
     def _prune_sublevel(level: dict, required_set: set = None) -> (dict | None):
@@ -176,64 +191,76 @@ class ElementLocator:
                 target_info = method
             return target_info
 
-    @staticmethod
-    def _locate_elements(element, locator_method: dict, locate_timeout, load_timeout) -> list:
+    def _locate_elements(self, element, locator_method: dict) -> list:
         """
         使用 locator_method 字典中的查找方法，从 element 的子元素中找出目标元素\n
         如果使用get_frame(s)查找, 就会等待其加载完毕(读取其 contentDocument 的 readyState 以判定其是否加载完毕)\n
-        返回符合目标的元素列表，没有返回空列表
+        返回符合目标的元素列表，没有/失败则返回空列表
         """
         
         method_types: list = locator_method['type']
         locators: list = locator_method['locator']
 
-        is_repeatable = bool(set(method_types) & {'eles','children','s_eles','get_frames'})
         is_iframe = bool(set(method_types) & {'get_frame','get_iframe'}) 
         is_exist = False
-
+        
         for method_type in method_types:
             if not is_exist:
+                
                 method = getattr(element, method_type)
+                self.logger.debug(f"获取到查找方法: {method.__name__}")
                 for locator in locators:
-                    child_elements = method(locator, timeout = locate_timeout)
+                    self.logger.debug(f"执行查找: locator:{locator_method}")
+                    child_elements = method(locator, timeout = self._locate_timeout)
+                    self.logger.debug(f"查找完成: {child_elements.__repr__()}")
                     if child_elements:
                         is_exist = True
                         break
             else:
                 break
-        
-        results: list = child_elements if is_repeatable else [child_elements]
-        
-        if is_exist:
-            if is_iframe:
-                # 若为 iframe(s) 则进行等待所有的 contentDocument 的 readState 为 'complete'
-                for iframe in results:
-                    start_time = time.monotonic()
-                    is_loaded = False
-                    while time.monotonic() - start_time <= load_timeout:
-                        is_loaded = iframe.run_js("return document.readyState === 'complete'")
-                        if is_loaded:
-                            break
-                        time.sleep(0.2)
-                    if not is_loaded:
-                        raise TimeoutError(f"等待时间{load_timeout}之后iframe元素仍未加载完毕\n 元素：{iframe}")
-            # 按照查找方式的不同，child_elements可能是列表或者元素，只用eles/children会返回列表
-            return results
+        # 按照查找方式的不同，child_elements可能是列表或者元素，只用eles/children会返回列表
+        if child_elements:
+            # 不能把<NoneElement装进列表中>
+            results = child_elements if isinstance(child_elements, list) else [child_elements]
         else:
-            return []
+            results = []
+
+        if is_iframe:
+            # 若为 iframe(s) 则进行等待所有的 contentDocument 的 readState 为 'complete'
+            for iframe in results:
+                self.logger.debug("开始iframe加载状态检查")
+                start_time = time.monotonic()
+                is_loaded = False
+                while time.monotonic() - start_time <= self._load_timeout:
+                    try:
+                        is_loaded = iframe.run_js("return document.readyState === 'complete'")
+                        self.logger.debug(f"is_loaded结果{is_loaded}")
+                    except ElementLostError as e:
+                        self.logger.info(f"注意: 操作过快或者页面加载较慢导致持有失效iframe元素, 错误信息: {e}")
+                    except Exception as e:
+                        self.logger.warning(f"警告: 处理iframe时出现错误, 错误信息: {e}")
+                    if is_loaded:
+                        break
+                    time.sleep(0.5)
+                    
+                if not is_loaded:
+                    raise TimeoutError(f"等待时间{self._load_timeout}之后iframe元素仍未加载完毕\n 元素：{iframe}")
+        
+        return results
 
     def _process_level(self, level: dict):
         """
         处理单个字典\n
         """
-        parent_element = self._element_stack.top()
+        parent_element = self._element_stack.top
+        self.logger.debug(f"父元素{parent_element.__repr__}")
         
         for node in level.values():
             node: dict
             # ================1================ 找出满足条件的元素列表
             locator_method: dict = node['locator_method']
-            child_elements: list = ElementLocator._locate_elements(parent_element, locator_method, self._locate_timeout, self._load_timeout)
-
+            child_elements: list = self._locate_elements(parent_element, locator_method)
+            self.logger.debug(f"返回查找结果{child_elements}")
             if child_elements:
                 
                 # 正常查找到的情况
@@ -251,14 +278,18 @@ class ElementLocator:
                             # 更新result，在result_dict下指定位置 **新增** node_virtual_dict
                             container_name = virtual_dict['container']
                             virtual_container: dict = self._container_stack.resolve(container_name)
+                            
+                            self.logger.debug(f"开始新增虚拟字典, 容器名:{container_name}, 键:{key}, 目标{virtual_container}")
                             # 处理新增：字典列表追加
                             if virtual_container.get(key) is None:
+                                self.logger.debug("原有键不存在, 新建该键")
                                 # 更新结果
                                 virtual_container[key] = [node_virtual_dict]
                                 # 压入栈中
                                 self._container_stack.push(name=key, ref=node_virtual_dict)
                                 is_container_pushed = True
                             elif isinstance(virtual_container.get(key), list):
+                                self.logger.debug("执行追加原有键不存在, 新建该键")
                                 # 更新结果
                                 virtual_container_list: list = virtual_container.get(key)
                                 virtual_container_list.append(node_virtual_dict)
@@ -266,16 +297,19 @@ class ElementLocator:
                                 self._container_stack.push(name=key, ref=node_virtual_dict)
                                 is_container_pushed = True
                             else:
-                                # TODO 报错，不允许将原来的信息/方法键覆盖成容器
-                                pass
+                                raise KeyNameConflict(f"容器{virtual_container}键{key}位置下已有信息或者方法, 不允许覆盖该键")
 
                         # ================3================ 若有 targets 则逐个调用get_targets获取信息
                         targets: dict = node.get('targets')
-
                         if targets:
+                            self.logger.debug("开始提取目标")
+
                             for target_name in targets:
                                 target: dict = targets.get(target_name) # 剪枝后其不会是 None
                                 target_object = ElementLocator._get_target(child_element, target) # 获取到目标，字符串或者回调函数
+                                
+                                self.logger.debug(f"提取{target_name}得到结果{target_object}")
+
                                 if target_object is not None:
                                     # 目标存在
                                     container_name = target['container']
@@ -285,10 +319,9 @@ class ElementLocator:
                                     if target_container.get(target_key) is None:
                                         target_container[target_key] = target_object
                                     else:
-                                        # TODO 设计报错，不允许(1)覆盖已有的信息/方法键，(2)覆盖已经存了虚拟容器或者虚拟容器列表的键
-                                        pass
-                        # ================4================ 若有 sub_elements 则处理sub_elements
+                                        raise KeyNameConflict(f"指定的虚拟字典{target_container}的键{key}下已有其他信息, 不允许覆盖")
 
+                        # ================4================ 若有 sub_elements 则处理sub_elements
                         sub_elements: list = node.get('sub_elements')
                         if sub_elements:
                             self._process_level(sub_elements)
@@ -299,20 +332,21 @@ class ElementLocator:
                         if is_container_pushed:
                             self._container_stack.pop()    
                         self._element_stack.pop()
-
             else:
-                # TODO 未找到的情况，按照不同的presence处理
-                presence = node.get('presence')
+                # 未找到的情况，按照不同的presence处理
+                presence = node.get('presence','unknown')
                 if presence:
                     if presence == 'required':
-                        pass
+                        raise ElementNotFoundError("错误: 必须元素未找到")
                     elif presence == 'optional':
-                        continue
+                        sub_elements: list = node.get('sub_elements')
+                        if sub_elements:
+                            self.logger.debug("可选元素未找到, 跳过, 处理其子元素")
+                            self._process_level(sub_elements)
+                        else:
+                            continue
                     elif presence == 'unknown':
                         pass
-                else:
-                    # TODO 设计这一步所的逻辑
-                    pass
 
     def extract_info(self, required_set: set = None) -> dict:
         """
@@ -330,14 +364,3 @@ class ElementLocator:
         
         return result
 
-if __name__ == "__main__":
-    import json
-    with open(r"F:\coding\临时工具、临时测试\UCAS_MOOC\config.json",'r',encoding='utf-8') as f:
-        config = json.load(f)
-
-    page = ChromiumPage(9444)
-    el = ElementLocator(page, config)
-    result = el.extract_info({"stem","name_and_content","my_answer","is_answer_correct"})
-
-    with open(r"F:\coding\临时工具、临时测试\UCAS_MOOC\剪枝测试\1.json",'w',encoding='utf-8') as f:
-        json.dump(result,f,ensure_ascii=False,indent=4)
