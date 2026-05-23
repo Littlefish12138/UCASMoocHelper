@@ -1,0 +1,463 @@
+{
+  "video_button": {
+    "description": "调整到视频区域的按钮",
+    "locator_method": {
+      "type": ["ele"],
+      "locator": ["#dct1"]
+    },
+    "targets": {
+      "video_button": {
+        "type": "method",
+        "description": "点击方法，通过js",
+        "container": "$root",
+        "key": "video_button",
+        "method": "run_js",
+        "args": "eval(this.onclick())"
+      }
+    }
+  },
+  "question_button": {
+    "description": "章节测试按钮",
+    "locator_method": {
+      "type": ["ele"],
+      "locator": ["#dct2"]
+    },
+    "targets": {
+      "question_button": {
+        "type": "method",
+        "description": "点击方法，通过js",
+        "container": "$root",
+        "key": "question_button",
+        "method": "run_js",
+        "args": "eval(this.onclick())"
+      }
+    }
+  },
+  "course_tree": {
+    "description": "整个课程树元素",
+    "locator_method": {
+      "type": ["ele"],
+      "locator": ["#coursetree", ".onetoone"]
+    },
+    "sub_elements": {
+      "chapter": {
+        "description": "一章的父元素",
+        "locator_method": {
+          "type": ["children", "eles"],
+          "locator": [".cells"]
+        },
+        "virtual_dict": {
+          "key": "chapters",
+          "container": "$root"
+        },
+        "sub_elements": {
+          "title": {
+            "description": "一章的标题元素",
+            "locator_method": {
+              "type": ["child", "ele"],
+              "locator": ["tag:h3"]
+            },
+            "sub_elements": {
+              "chapter_title_span": {
+                "description": "一章的标题子元素",
+                "locator_method": {
+                  "type": ["ele"],
+                  "locator": ["tag:span", ".titlewords"]
+                },
+                "targets": {
+                  "title": {
+                    "type": "information",
+                    "description": "一章的标题",
+                    "container": "$parent",
+                    "key": "title",
+                    "value": {
+                      "method": "raw_text"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "section": {
+            "description": "一节视频的父元素",
+            "locator_method": {
+              "type": ["children", "eles"],
+              "locator": [".ncells"]
+            },
+            "virtual_dict": {
+              "key": "sections",
+              "container": "$parent"
+            },
+            "presence": "optional",
+            "sub_elements": {
+              "title": {
+                "description": "一节视频的标题和href所在元素",
+                "locator_method": {
+                  "type": ["ele"],
+                  "locator": ["tag:a"]
+                },
+                "targets": {
+                  "section_title": {
+                    "type": "information",
+                    "description": "一节视频的标题",
+                    "container": "$parent",
+                    "key": "title",
+                    "value": {
+                      "method": "raw_text"
+                    }
+                  },
+                  "section_click_callback_js": {
+                    "type": "method",
+                    "description": "点击回调，来自其href属性",
+                    "container": "$parent",
+                    "key": "click_callback_js",
+                    "method": "run_js",
+                    "args": "eval(this.href)"
+                  },
+                  "section_click_callback": {
+                    "type": "method",
+                    "description": "点击回调，使用时需要确保元素可见",
+                    "container": "$parent",
+                    "key": "click_callback",
+                    "method": "click"
+                  }
+                }
+              },
+              "is_section_finished": {
+                "description": "一节视频是否完成",
+                "locator_method": {
+                  "type": ["ele"],
+                  "locator": [".^roundpointStudent"]
+                },
+                "targets": {
+                  "is_section_finished": {
+                    "type": "information",
+                    "description": "一节视频是否全部完成，直接提取出True/False",
+                    "container": "$parent",
+                    "key": "is_finished",
+                    "value": {
+                      "method": "run_js",
+                      "args": "return this.getAttribute('class') === 'roundpointStudent  blue'"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "video_iframe_out": {
+    "description": "视频最外层的iframe元素",
+    "locator_method": {
+      "type": ["get_frame"],
+      "locator": ["@src:num=0"]
+    },
+    "virtual_dict": {
+      "key": "video",
+      "container": "$root"
+    },
+    "sub_elements": {
+      "video_taskpoint": {
+        "description": "视频的任务点是否完成元素",
+        "locator_method": {
+          "type": ["ele"],
+          "locator": [".^ans-job-icon"]
+        },
+        "targets": {
+          "is_video_finished": {
+            "type": "information",
+            "description": "视频任务点是否完成，直接提取出True/False而不是其attr属性",
+            "key": "is_finished",
+            "container": "$parent",
+            "value": {
+              "method": "run_js",
+              "args": "return this.getAttribute('aria-label') === '任务点已完成'"
+            }
+          }
+        }
+      },
+      "video_iframe_in": {
+        "description": "视频直接外层的iframe元素",
+        "locator_method": {
+          "type": ["get_frame"],
+          "locator": ["@src^/ananas/modules/video/index.html"]
+        },
+        "sub_elements": {
+          "video": {
+            "description": "视频对象",
+            "locator_method": {
+              "type": ["ele"],
+              "locator": ["tag:video", "#video_html5_api"]
+            },
+            "targets": {
+              "video_play": {
+                "type": "method",
+                "description": "视频的.play()方法",
+                "key": "video_play",
+                "container": "$parent",
+                "method": "run_js",
+                "args": "eval(this.play())"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "question_iframe_out": {
+    "description": "章节测试的外层iframe元素",
+    "locator_method": {
+      "type": ["get_frame"],
+      "locator": ["@src:num=1"]
+    },
+    "sub_elements": {
+      "question_taskpoint": {
+        "description": "章节测试任务点",
+        "locator_method": {
+          "type": ["ele"],
+          "locator": [".^ans-job-icon", "#ext-gen1050"]
+        },
+        "targets": {
+          "is_question_finished": {
+            "type": "information",
+            "description": "章节测试任务点是否完成，直接提取出True/False而不是其aria-label属性",
+            "key": "is_finished",
+            "container": "$root",
+            "value": {
+              "method": "run_js",
+              "args": "return this.getAttribute('aria-label') === '任务点已完成'"
+            }
+          }
+        }
+      },
+      "question_iframe_middle": {
+        "description": "章节测试题直接外层的iframe",
+        "locator_method": {
+          "type": ["get_frame"],
+          "locator": ["@src^/ananas/modules/work/index.html"]
+        },
+        "sub_elements": {
+          "question_iframe_in": {
+            "description": "章节测试最内侧的iframe",
+            "locator_method": {
+              "type": ["get_frame"],
+              "locator": ["@src^/mooc-ans/api/work"]
+            },
+            "sub_elements": {
+              "question_root": {
+                "description": "整个题目对应的的元素",
+                "locator_method": {
+                  "type": ["eles"],
+                  "locator": [".TiMu singleQuesId"]
+                },
+                "virtual_dict": {
+                  "key": "questions",
+                  "container": "$parent"
+                },
+                "targets": {
+                  "data": {
+                    "type": "information",
+                    "description": "题目id数值",
+                    "container": "questions",
+                    "key": "data",
+                    "value": {
+                      "method": "attr",
+                      "args": "data"
+                    }
+                  }
+                },
+                "sub_elements": {
+                  "stem_parent": {
+                    "description": "题干父元素",
+                    "locator_method": {
+                      "type": ["child", "ele"],
+                      "locator": [".Zy_TItle clearfix"]
+                    },
+                    "sub_elements": {
+                      "stem_child": {
+                        "description": "题干所在位置",
+                        "locator_method": {
+                          "type": ["child", "ele"],
+                          "locator": [
+                            ".^clearfix",
+                            ".clearfix",
+                            ".clearfix font-cxsecret fontLabel"
+                          ]
+                        },
+                        "targets": {
+                          "stem": {
+                            "type": "information",
+                            "description": "题干",
+                            "container": "questions",
+                            "key": "stem",
+                            "value": {
+                              "method": "text"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "option_parent": {
+                    "description": "选项父元素",
+                    "presence": "optional",
+                    "locator_method": {
+                      "type": ["eles"],
+                      "locator": ["tag:li"]
+                    },
+                    "virtual_dict": {
+                      "key": "options",
+                      "container": "questions"
+                    },
+                    "targets": {
+                      "name_and_content": {
+                        "type": "information",
+                        "description": "选项名和选项内容，比如A、选项内容",
+                        "container": "$parent",
+                        "key": "name_and_content",
+                        "value": {
+                          "method": "text"
+                        }
+                      }
+                    },
+                    "sub_elements": {
+                      "button": {
+                        "description": "选择时点击的元素",
+                        "locator_method": {
+                          "type": ["child", "ele"],
+                          "locator": ["tag:label"]
+                        },
+                        "targets": {
+                          "option_click_callback": {
+                            "type": "method",
+                            "description": "点击回调，点击以选择此选项",
+                            "container": "$parent",
+                            "key": "click_callback",
+                            "method": "click"
+                          },
+                          "judgement": {
+                            "type": "information",
+                            "description": "未答题时，判断题选项的'对'/'错'",
+                            "container": "$parent",
+                            "key": "judgement",
+                            "value": {
+                              "method": "text"
+                            }
+                          }
+                        }
+                      },
+                      "option_child": {
+                        "description": "选项内容",
+                        "presence": "optional",
+                        "locator_method": {
+                          "type": ["ele"],
+                          "locator": ["tag:a", "@href^javascript:void(0)"]
+                        },
+                        "targets": {
+                          "option_content": {
+                            "type": "information",
+                            "description": "选项内容，仅内容，不含选项名",
+                            "container": "options",
+                            "key": "content",
+                            "value": {
+                              "method": "text"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "my_answer_parent": {
+                    "description": "我的答案父元素",
+                    "presence": "optional",
+                    "locator_method": {
+                      "type": ["child", "ele"],
+                      "locator": [".Py_answer clearfix"]
+                    },
+                    "sub_elements": {
+                      "my_answer_child": {
+                        "description": "我的答案外部的span元素",
+                        "locator_method": {
+                          "type": ["child", "ele"],
+                          "locator": ["tag:span"]
+                        },
+                        "targets": {
+                          "my_answer": {
+                            "type": "information",
+                            "description": "我的答案",
+                            "container": "questions",
+                            "key": "my_answer",
+                            "value": {
+                              "method": "text"
+                            }
+                          }
+                        }
+                      },
+                      "is_answer_correct": {
+                        "description": "我的答案是否正确",
+                        "locator_method": {
+                          "type": ["child", "ele"],
+                          "locator": ["tag:i", ".^fr"]
+                        },
+                        "targets": {
+                          "is_answer_correct": {
+                            "type": "information",
+                            "description": "答案是否正确",
+                            "container": "questions",
+                            "key": "is_correct",
+                            "value": {
+                              "method": "attr",
+                              "args": "aria-label"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "submit_button": {
+                "description": "提交按钮",
+                "locator_method": {
+                  "type": ["ele"],
+                  "locator": [
+                    "css:#RightCon > div.radiusBG > div > div.ZY_sub.clearfix > a.Btn_blue_1.marleft10.workBtnIndex"
+                  ]
+                },
+                "targets": {
+                  "submit_button": {
+                    "type": "method",
+                    "description": "提交回调, 通过执行onclick",
+                    "container": "$root",
+                    "key": "submit_button",
+                    "method": "click",
+                    "args": "eval(this.onclick())"
+                  }
+                }
+              },
+              "confirm_button": {
+                "description": "确认提交按钮",
+                "locator_method": {
+                  "type": ["ele"],
+                  "locator": ["css:#confirmSubWin > div > div > a.bluebtn"]
+                },
+                "targets": {
+                  "confirm_button": {
+                    "type": "method",
+                    "description": "确认提交回调, 直接执行内部的onclick",
+                    "container": "$root",
+                    "key": "confirm_button",
+                    "method": "run_js",
+                    "args": "eval(this.onclick())"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
