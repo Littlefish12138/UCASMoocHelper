@@ -358,7 +358,7 @@
         <string notr="true">background: transparent;</string>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="taskPage">
         <property name="styleSheet">
@@ -402,7 +402,7 @@
              <property name="geometry">
               <rect>
                <x>0</x>
-               <y>0</y>
+               <y>-627</y>
                <width>581</width>
                <height>1017</height>
               </rect>
@@ -513,8 +513,8 @@
 
 /* 指示器（圆形按钮）基础样式 */
 QRadioButton::indicator {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 7px;          /* 完全圆形 */
     border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
     background: #FFFFFF;         /* 内部始终白色 */
@@ -526,10 +526,28 @@ QRadioButton::indicator:hover {
     background: #FFFFFF;
 }
 
-/* 选中状态：仅边框变色，内部依然白色 */
+/* 选中状态：边框改为深蓝色，内部通过径向渐变绘制蓝色同心圆（中心蓝色，边缘留白） */
 QRadioButton::indicator:checked {
-    border-color: #1976D2;       /* 深蓝色边框 */
-    background: #FFFFFF;         /* 强制内部白色 */
+    border-color: #1976D2;                     /* 深蓝色边框 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,                       /* 圆心纯蓝色 */
+        stop: 0.6 #1976D2,                     /* 半径 60% 范围内保持纯蓝 */
+        stop: 0.61 #FFFFFF                     /* 半径 60% 外变为白色，形成留白边缘 */
+    );
+}
+
+/* 选中且悬停时：维持同心圆渐变，边框可稍作加强（可选） */
+QRadioButton::indicator:checked:hover {
+    border-color: #1E88E5;                     /* 略亮一点的深蓝边框，保持视觉反馈 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,
+        stop: 0.6 #1976D2,
+        stop: 0.61 #FFFFFF
+    );
 }</string>
                         </property>
                         <property name="text">
@@ -631,8 +649,8 @@ QRadioButton::indicator:checked {
 
 /* 指示器（圆形按钮）基础样式 */
 QRadioButton::indicator {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 7px;          /* 完全圆形 */
     border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
     background: #FFFFFF;         /* 内部始终白色 */
@@ -644,10 +662,28 @@ QRadioButton::indicator:hover {
     background: #FFFFFF;
 }
 
-/* 选中状态：仅边框变色，内部依然白色 */
+/* 选中状态：边框改为深蓝色，内部通过径向渐变绘制蓝色同心圆（中心蓝色，边缘留白） */
 QRadioButton::indicator:checked {
-    border-color: #1976D2;       /* 深蓝色边框 */
-    background: #FFFFFF;         /* 强制内部白色 */
+    border-color: #1976D2;                     /* 深蓝色边框 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,                       /* 圆心纯蓝色 */
+        stop: 0.6 #1976D2,                     /* 半径 60% 范围内保持纯蓝 */
+        stop: 0.61 #FFFFFF                     /* 半径 60% 外变为白色，形成留白边缘 */
+    );
+}
+
+/* 选中且悬停时：维持同心圆渐变，边框可稍作加强（可选） */
+QRadioButton::indicator:checked:hover {
+    border-color: #1E88E5;                     /* 略亮一点的深蓝边框，保持视觉反馈 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,
+        stop: 0.6 #1976D2,
+        stop: 0.61 #FFFFFF
+    );
 }</string>
                         </property>
                         <property name="text">
@@ -736,33 +772,51 @@ QRadioButton::indicator:checked {
                        <widget class="QRadioButton" name="manualRadio">
                         <property name="styleSheet">
                          <string notr="true">QRadioButton {
-    font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
-    font-size: 14px;
-    spacing: 8px;
-    color: #2C3E50;
-    background: transparent;
-}
+                                                font-family: &quot;Segoe UI&quot;, &quot;Microsoft YaHei&quot;;
+                                                font-size: 14px;
+                                                spacing: 8px;
+                                                color: #2C3E50;
+                                                background: transparent;
+                                            }
 
-/* 指示器（圆形按钮）基础样式 */
-QRadioButton::indicator {
-    width: 14px;
-    height: 14px;
-    border-radius: 7px;          /* 完全圆形 */
-    border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
-    background: #FFFFFF;         /* 内部始终白色 */
-}
+                                            /* 指示器（圆形按钮）基础样式 */
+                                            QRadioButton::indicator {
+                                                width: 13px;
+                                                height: 13px;
+                                                border-radius: 7px;          /* 完全圆形 */
+                                                border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
+                                                background: #FFFFFF;         /* 内部始终白色 */
+                                            }
 
-/* 悬停效果（边框变色，内部保持白色） */
-QRadioButton::indicator:hover {
-    border-color: #42A5F5;
-    background: #FFFFFF;
-}
+                                            /* 悬停效果（边框变色，内部保持白色） */
+                                            QRadioButton::indicator:hover {
+                                                border-color: #42A5F5;
+                                                background: #FFFFFF;
+                                            }
 
-/* 选中状态：仅边框变色，内部依然白色 */
-QRadioButton::indicator:checked {
-    border-color: #1976D2;       /* 深蓝色边框 */
-    background: #FFFFFF;         /* 强制内部白色 */
-}</string>
+                                            /* 选中状态：边框改为深蓝色，内部通过径向渐变绘制蓝色同心圆（中心蓝色，边缘留白） */
+                                            QRadioButton::indicator:checked {
+                                                border-color: #1976D2;                     /* 深蓝色边框 */
+                                                background: qradialgradient(
+                                                    cx: 0.5, cy: 0.5, radius: 0.5,
+                                                    fx: 0.5, fy: 0.5,
+                                                    stop: 0 #1976D2,                       /* 圆心纯蓝色 */
+                                                    stop: 0.6 #1976D2,                     /* 半径 60% 范围内保持纯蓝 */
+                                                    stop: 0.61 #FFFFFF                     /* 半径 60% 外变为白色，形成留白边缘 */
+                                                );
+                                            }
+
+                                            /* 选中且悬停时：维持同心圆渐变，边框可稍作加强（可选） */
+                                            QRadioButton::indicator:checked:hover {
+                                                border-color: #1E88E5;                     /* 略亮一点的深蓝边框，保持视觉反馈 */
+                                                background: qradialgradient(
+                                                    cx: 0.5, cy: 0.5, radius: 0.5,
+                                                    fx: 0.5, fy: 0.5,
+                                                    stop: 0 #1976D2,
+                                                    stop: 0.6 #1976D2,
+                                                    stop: 0.61 #FFFFFF
+                                                );
+                        } </string>
                         </property>
                         <property name="text">
                          <string>手动启动</string>
@@ -797,6 +851,7 @@ QCheckBox::indicator {
     background-color: #FFFFFF;
 }
 
+
 /* 悬停效果 */
 QCheckBox::indicator:hover {
     border-color: #42A5F5;
@@ -807,15 +862,6 @@ QCheckBox::indicator:hover {
 QCheckBox::indicator:checked {
     border-color: #1976D2;
     background-color: #1976D2;
-}
-
-/* 禁用状态（可选） */
-QCheckBox::indicator:disabled {
-    border-color: #D1D5DB;
-    background-color: #F3F4F6;
-}
-QCheckBox:disabled {
-    color: #9CA3AF;
 }</string>
                    </property>
                    <property name="text">
@@ -843,7 +889,7 @@ QCheckBox:disabled {
                      QFrame#launchOptionsFrame {
                          background-color: #F9FAFB;
                          border: 1px solid #E5E7EB;
-                         border-radius: 6px;
+                         border-radius: 9px;
                          padding: 8px;
                      }
                     </string>
@@ -1077,8 +1123,8 @@ QCheckBox:disabled {
 
 /* 指示器（圆形按钮）基础样式 */
 QRadioButton::indicator {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 7px;          /* 完全圆形 */
     border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
     background: #FFFFFF;         /* 内部始终白色 */
@@ -1090,10 +1136,28 @@ QRadioButton::indicator:hover {
     background: #FFFFFF;
 }
 
-/* 选中状态：仅边框变色，内部依然白色 */
+/* 选中状态：边框改为深蓝色，内部通过径向渐变绘制蓝色同心圆（中心蓝色，边缘留白） */
 QRadioButton::indicator:checked {
-    border-color: #1976D2;       /* 深蓝色边框 */
-    background: #FFFFFF;         /* 强制内部白色 */
+    border-color: #1976D2;                     /* 深蓝色边框 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,                       /* 圆心纯蓝色 */
+        stop: 0.6 #1976D2,                     /* 半径 60% 范围内保持纯蓝 */
+        stop: 0.61 #FFFFFF                     /* 半径 60% 外变为白色，形成留白边缘 */
+    );
+}
+
+/* 选中且悬停时：维持同心圆渐变，边框可稍作加强（可选） */
+QRadioButton::indicator:checked:hover {
+    border-color: #1E88E5;                     /* 略亮一点的深蓝边框，保持视觉反馈 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,
+        stop: 0.6 #1976D2,
+        stop: 0.61 #FFFFFF
+    );
 }</string>
                       </property>
                       <property name="text">
@@ -1296,8 +1360,8 @@ QCheckBox:disabled {
 
 /* 指示器（圆形按钮）基础样式 */
 QRadioButton::indicator {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     border-radius: 7px;          /* 完全圆形 */
     border: 2px solid #B0BEC5;   /* 未选中边框灰色 */
     background: #FFFFFF;         /* 内部始终白色 */
@@ -1309,14 +1373,32 @@ QRadioButton::indicator:hover {
     background: #FFFFFF;
 }
 
-/* 选中状态：仅边框变色，内部依然白色 */
+/* 选中状态：边框改为深蓝色，内部通过径向渐变绘制蓝色同心圆（中心蓝色，边缘留白） */
 QRadioButton::indicator:checked {
-    border-color: #1976D2;       /* 深蓝色边框 */
-    background: #FFFFFF;         /* 强制内部白色 */
+    border-color: #1976D2;                     /* 深蓝色边框 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,                       /* 圆心纯蓝色 */
+        stop: 0.6 #1976D2,                     /* 半径 60% 范围内保持纯蓝 */
+        stop: 0.61 #FFFFFF                     /* 半径 60% 外变为白色，形成留白边缘 */
+    );
+}
+
+/* 选中且悬停时：维持同心圆渐变，边框可稍作加强（可选） */
+QRadioButton::indicator:checked:hover {
+    border-color: #1E88E5;                     /* 略亮一点的深蓝边框，保持视觉反馈 */
+    background: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 0.5,
+        fx: 0.5, fy: 0.5,
+        stop: 0 #1976D2,
+        stop: 0.6 #1976D2,
+        stop: 0.61 #FFFFFF
+    );
 }</string>
                       </property>
                       <property name="text">
-                       <string>保存所有章节测试题</string>
+                       <string>保存章节测试题</string>
                       </property>
                       <attribute name="buttonGroup">
                        <string notr="true">buttonGroup_2</string>
@@ -2280,7 +2362,7 @@ QPushButton#startBtn:pressed {
  <resources/>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
