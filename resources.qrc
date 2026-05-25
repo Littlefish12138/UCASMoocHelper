@@ -1,0 +1,10 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/asset">
+        <file>asset/chrome-icon.svg</file>
+        <file>asset/edge-icon.svg</file>
+        <file>asset/powershell-icon.svg</file>
+        <file>asset/json-filetype-icon.svg</file>
+        <file>asset/folder-icon.svg</file>
+    </qresource>
+</RCC>

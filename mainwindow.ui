@@ -146,9 +146,9 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>-626</y>
+              <y>0</y>
               <width>539</width>
-              <height>1072</height>
+              <height>999</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_scrollTask">
@@ -241,6 +241,9 @@ QLineEdit:focus {
                     <property name="checked">
                      <bool>true</bool>
                     </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup_2</string>
+                    </attribute>
                    </widget>
                   </item>
                   <item>
@@ -314,6 +317,9 @@ QLineEdit:focus {
                     <property name="text">
                      <string>保存章节测试题</string>
                     </property>
+                    <attribute name="buttonGroup">
+                     <string notr="true">buttonGroup_2</string>
+                    </attribute>
                    </widget>
                   </item>
                   <item>
@@ -375,207 +381,149 @@ QLineEdit:focus {
                  <number>12</number>
                 </property>
                 <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_uploadAreas">
+                 <layout class="QHBoxLayout" name="horizontalLayout_pageConfig">
                   <property name="spacing">
-                   <number>108</number>
+                   <number>8</number>
                   </property>
                   <item>
-                   <widget class="QFrame" name="frame_upload_page_config">
-                    <property name="enabled">
-                     <bool>true</bool>
-                    </property>
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
+                   <widget class="QLabel" name="label_page_config_path">
                     <property name="minimumSize">
                      <size>
-                      <width>135</width>
-                      <height>143</height>
+                      <width>90</width>
+                      <height>0</height>
                      </size>
                     </property>
-                    <property name="styleSheet">
-                     <string notr="true">#frame_upload_page_config {
-    background-color: #f8f9fb;
-    border: 2px dashed #d0d5dd;
-    border-radius: 10px;
-}
-#frame_upload_page_config:hover {
-    border-color: #3498db;
-    background-color: #eef4fb;
-}</string>
+                    <property name="text">
+                     <string>页面配置 JSON</string>
                     </property>
-                    <layout class="QVBoxLayout" name="verticalLayout_uploadPageConfig">
-                     <property name="spacing">
-                      <number>10</number>
-                     </property>
-                     <property name="leftMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="topMargin">
-                      <number>24</number>
-                     </property>
-                     <property name="rightMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="bottomMargin">
-                      <number>24</number>
-                     </property>
-                     <item>
-                      <widget class="QLabel" name="label_upload_page_config">
-                       <property name="styleSheet">
-                        <string notr="true">font-size: 13px; color: #5a6377;</string>
-                       </property>
-                       <property name="text">
-                        <string>页面配置 JSON</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignmentFlag::AlignCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item alignment="Qt::AlignmentFlag::AlignHCenter">
-                      <widget class="QPushButton" name="icon_json_page">
-                       <property name="minimumSize">
-                        <size>
-                         <width>64</width>
-                         <height>64</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>64</width>
-                         <height>64</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>false</bool>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true">QPushButton {
-    border: none;
-    background: transparent;
-}</string>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                       <property name="icon">
-                        <iconset>
-                         <normaloff>asset/json_filetype_icon_177531.svg</normaloff>asset/json_filetype_icon_177531.svg</iconset>
-                       </property>
-                       <property name="iconSize">
-                        <size>
-                         <width>64</width>
-                         <height>64</height>
-                        </size>
-                       </property>
-                       <property name="autoExclusive">
-                        <bool>false</bool>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
                    </widget>
                   </item>
                   <item>
-                   <widget class="QFrame" name="frame_upload_answer">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
+                   <widget class="QLineEdit" name="input_page_config_path">
+                    <property name="placeholderText">
+                     <string>选择页面配置文件...</string>
                     </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btn_browse_page_config">
                     <property name="minimumSize">
                      <size>
-                      <width>135</width>
-                      <height>143</height>
+                      <width>40</width>
+                      <height>0</height>
                      </size>
                     </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="cursor">
+                     <cursorShape>PointingHandCursor</cursorShape>
+                    </property>
                     <property name="styleSheet">
-                     <string notr="true">#frame_upload_answer {
-    background-color: #f8f9fb;
-    border: 2px dashed #d0d5dd;
+                     <string notr="true">QPushButton {
+    border: 2px solid #cccccc;
     border-radius: 10px;
+    background: transparent;
 }
-#frame_upload_answer:hover {
-    border-color: #3498db;
-    background-color: #eef4fb;
+QPushButton:hover {
+    border-color: #666666;
+    background: rgba(200, 200, 200, 0.1);
+}
+QPushButton:pressed {
+    border-color: #333333;
+    background: rgba(150, 150, 150, 0.2);
 }</string>
                     </property>
-                    <layout class="QVBoxLayout" name="verticalLayout_uploadAnswer">
-                     <property name="spacing">
-                      <number>10</number>
-                     </property>
-                     <property name="leftMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="topMargin">
-                      <number>24</number>
-                     </property>
-                     <property name="rightMargin">
-                      <number>0</number>
-                     </property>
-                     <property name="bottomMargin">
-                      <number>24</number>
-                     </property>
-                     <item>
-                      <widget class="QLabel" name="label_upload_answer">
-                       <property name="styleSheet">
-                        <string notr="true">font-size: 13px; color: #5a6377;</string>
-                       </property>
-                       <property name="text">
-                        <string>答案 JSON</string>
-                       </property>
-                       <property name="alignment">
-                        <set>Qt::AlignmentFlag::AlignCenter</set>
-                       </property>
-                      </widget>
-                     </item>
-                     <item alignment="Qt::AlignmentFlag::AlignHCenter">
-                      <widget class="QPushButton" name="icon_json_answer">
-                       <property name="minimumSize">
-                        <size>
-                         <width>64</width>
-                         <height>64</height>
-                        </size>
-                       </property>
-                       <property name="maximumSize">
-                        <size>
-                         <width>64</width>
-                         <height>64</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="styleSheet">
-                        <string notr="true">QPushButton {
-    border: none;
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/asset/asset/json-filetype-icon.svg</normaloff>:/asset/asset/json-filetype-icon.svg</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>20</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QHBoxLayout" name="horizontalLayout_answerConfig">
+                  <property name="spacing">
+                   <number>8</number>
+                  </property>
+                  <item>
+                   <widget class="QLabel" name="label_answer_path">
+                    <property name="minimumSize">
+                     <size>
+                      <width>90</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string>答案 JSON</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLineEdit" name="input_answer_path">
+                    <property name="placeholderText">
+                     <string>选择答案配置文件...</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="btn_browse_answer_config">
+                    <property name="minimumSize">
+                     <size>
+                      <width>40</width>
+                      <height>0</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>40</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="cursor">
+                     <cursorShape>PointingHandCursor</cursorShape>
+                    </property>
+                    <property name="styleSheet">
+                     <string notr="true">QPushButton {
+    border: 2px solid #cccccc;
+    border-radius: 10px;
     background: transparent;
+}
+QPushButton:hover {
+    border-color: #666666;
+    background: rgba(200, 200, 200, 0.1);
+}
+QPushButton:pressed {
+    border-color: #333333;
+    background: rgba(150, 150, 150, 0.2);
 }</string>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                       <property name="icon">
-                        <iconset>
-                         <normaloff>asset/json_filetype_icon_177531.svg</normaloff>asset/json_filetype_icon_177531.svg</iconset>
-                       </property>
-                       <property name="iconSize">
-                        <size>
-                         <width>64</width>
-                         <height>64</height>
-                        </size>
-                       </property>
-                      </widget>
-                     </item>
-                    </layout>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/asset/asset/json-filetype-icon.svg</normaloff>:/asset/asset/json-filetype-icon.svg</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>20</width>
+                      <height>20</height>
+                     </size>
+                    </property>
                    </widget>
                   </item>
                  </layout>
@@ -627,25 +575,14 @@ QLineEdit:focus {
     border: 2px solid #cccccc;
     border-radius: 10px;
     background: transparent;
-    width: 40px;
-    height: 20px;
 }
-
-/* 鼠标悬停效果 */
 QPushButton:hover {
     border-color: #666666;
     background: rgba(200, 200, 200, 0.1);
 }
-
-/* 鼠标按下效果 */
 QPushButton:pressed {
     border-color: #333333;
     background: rgba(150, 150, 150, 0.2);
-}
-
-/* 禁用状态（如果需要） */
-QPushButton:disabled {
-    border-color: #e0e0e0;
 }</string>
                     </property>
                     <property name="text">
@@ -757,7 +694,7 @@ QWidget#card_edge:hover {
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap>asset/edge-icon.svg</pixmap>
+                        <pixmap resource="resources.qrc">:/asset/asset/edge-icon.svg</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -775,6 +712,9 @@ QWidget#card_edge:hover {
                        <property name="checked">
                         <bool>true</bool>
                        </property>
+                       <attribute name="buttonGroup">
+                        <string notr="true">buttonGroup</string>
+                       </attribute>
                       </widget>
                      </item>
                     </layout>
@@ -828,7 +768,7 @@ QWidget#card_chrome:hover {
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap>asset/chrome-icon.svg</pixmap>
+                        <pixmap resource="resources.qrc">:/asset/asset/chrome-icon.svg</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -843,6 +783,9 @@ QWidget#card_chrome:hover {
                        <property name="text">
                         <string>Chrome</string>
                        </property>
+                       <attribute name="buttonGroup">
+                        <string notr="true">buttonGroup</string>
+                       </attribute>
                       </widget>
                      </item>
                     </layout>
@@ -896,7 +839,7 @@ QWidget#card_manual:hover {
                         <string/>
                        </property>
                        <property name="pixmap">
-                        <pixmap>asset/powershell-icon.svg</pixmap>
+                        <pixmap resource="resources.qrc">:/asset/asset/powershell-icon.svg</pixmap>
                        </property>
                        <property name="scaledContents">
                         <bool>true</bool>
@@ -911,6 +854,9 @@ QWidget#card_manual:hover {
                        <property name="text">
                         <string>手动启动</string>
                        </property>
+                       <attribute name="buttonGroup">
+                        <string notr="true">buttonGroup</string>
+                       </attribute>
                       </widget>
                      </item>
                     </layout>
@@ -1099,7 +1045,17 @@ QWidget#card_manual:hover {
                      <string notr="true">font-weight: bold;</string>
                     </property>
                     <property name="text">
-                     <string>...</string>
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/asset/asset/folder-icon.svg</normaloff>:/asset/asset/folder-icon.svg</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>20</width>
+                      <height>20</height>
+                     </size>
                     </property>
                    </widget>
                   </item>
@@ -1943,6 +1899,12 @@ QComboBox QAbstractItemView {
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
 </ui>
