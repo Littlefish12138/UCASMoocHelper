@@ -15,14 +15,13 @@
 import time
 import concurrent.futures
 from collections import deque
-import json
 from copy import deepcopy
 import logging
 
 from DrissionPage import ChromiumPage
 
 from _locator import ElementLocator
-import utils
+
 
 # ================== 报错类 ==================
 class AnswerNotFoundError(Exception):

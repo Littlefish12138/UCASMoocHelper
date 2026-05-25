@@ -260,7 +260,7 @@ class ElementLocator:
             # ================1================ 找出满足条件的元素列表
             locator_method: dict = node['locator_method']
             child_elements: list = self._locate_elements(parent_element, locator_method)
-            self.logger.debug(f"返回查找结果{child_elements}")
+            self.logger.debug(f"返回查找结果{child_elements.__repr__()}")
             if child_elements:
                 
                 # 正常查找到的情况
@@ -339,14 +339,14 @@ class ElementLocator:
                     if presence == 'required':
                         raise ElementNotFoundError("错误: 必须元素未找到")
                     elif presence == 'optional':
+                        continue
+                    elif presence == 'unknown':
                         sub_elements: list = node.get('sub_elements')
                         if sub_elements:
                             self.logger.debug("可选元素未找到, 跳过, 处理其子元素")
                             self._process_level(sub_elements)
                         else:
                             continue
-                    elif presence == 'unknown':
-                        pass
 
     def extract_info(self, required_set: set = None) -> dict:
         """

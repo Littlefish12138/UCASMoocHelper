@@ -15,8 +15,6 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QObject, Signal, QThread, QEventLoop
 from PySide6.QtGui import QTextCursor
 
-# 忽略 Qt 样式表警告（box-shadow 等）
-warnings.filterwarnings("ignore", message=".*Unknown property.*")
 
 import resources_rc  # 确保资源加载（ui_main.py 也会导入，但保留不影响）
 import utils
