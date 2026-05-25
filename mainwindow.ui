@@ -69,6 +69,9 @@
         <property name="checked">
          <bool>true</bool>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_3</string>
+        </attribute>
        </widget>
       </item>
       <item>
@@ -85,6 +88,9 @@
         <property name="checkable">
          <bool>true</bool>
         </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_3</string>
+        </attribute>
        </widget>
       </item>
       <item>
@@ -148,7 +154,7 @@
               <x>0</x>
               <y>0</y>
               <width>539</width>
-              <height>999</height>
+              <height>1063</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_scrollTask">
@@ -605,7 +611,6 @@ QPushButton:pressed {
                </layout>
               </widget>
              </item>
-             <!-- 新增开始任务按钮 -->
              <item>
               <widget class="QPushButton" name="btn_start_task">
                <property name="minimumSize">
@@ -613,6 +618,9 @@ QPushButton:pressed {
                  <width>0</width>
                  <height>48</height>
                 </size>
+               </property>
+               <property name="cursor">
+                <cursorShape>PointingHandCursor</cursorShape>
                </property>
                <property name="styleSheet">
                 <string notr="true">QPushButton {
@@ -623,22 +631,16 @@ QPushButton:pressed {
     font-weight: bold;
     color: white;
     padding: 8px 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 QPushButton:hover {
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #27ae60, stop: 1 #2ecc71);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 QPushButton:pressed {
     background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #1e8f4a, stop: 1 #219653);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }</string>
                </property>
                <property name="text">
                 <string>开始任务</string>
-               </property>
-               <property name="cursor">
-                <cursorShape>PointingHandCursor</cursorShape>
                </property>
               </widget>
              </item>
@@ -1941,7 +1943,8 @@ QComboBox QAbstractItemView {
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>

@@ -142,11 +142,12 @@ class CourseHandler:
                     for section in sections:
                         click_callback_js = section.get('click_callback_js')
                         title = section.get('title')
+                        title_cleaned = title.replace('\n', '').replace('\t', '') # 有些时候\n\t似乎不会正常去除掉, 不知道为什么
                         is_finished = section.get('is_finished')
                         if only_unfinished and is_finished:
                             continue
                         task = {'click_callback':click_callback_js,
-                                'title':title}
+                                'title':title_cleaned}
                         task['video_finished'] = False if video_needed else None
                         task['question_finished'] = False if question_needed else None
                         tasks.append(task)
@@ -350,6 +351,7 @@ class CourseHandler:
                 # 点击视频，跳转到对应页面
                 self.logger.info("跳转到对应页面...")
                 task.get('click_callback')()
+                time.sleep(self._config.PAGE_LOAD_TIME)
 
                 # 检查是否为视频
                 if self._get_video_status() is None:
@@ -359,6 +361,7 @@ class CourseHandler:
                 
                 self.logger.info("切换到章节测试区域")
                 self._click_button('question_button')
+                time.sleep(self._config.PAGE_LOAD_TIME)
 
                 result = self._elem_locator.extract_info({'data','stem','options','name_and_content','my_answer','is_answer_correct'})
                 
