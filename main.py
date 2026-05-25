@@ -534,7 +534,7 @@ class MainWindow(QMainWindow):
 
     def _append_log(self, msg):
         """显示日志，并根据日志等级过滤"""
-        match = re.match(r"^\[(\w+)\]", msg)
+        match = re.search(r'\]\s+(\w+)\s+-', msg)
         if match:
             level = match.group(1)
             level_value = LOG_LEVEL_MAP.get(level, 20)
