@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
     QPlainTextEdit, QWidget
 )
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtCore import QFile, QIODevice, QObject, Signal, QThread
+from PySide6.QtCore import QFile, QIODevice, QObject, Signal, QThread, QEventLoop
 from PySide6.QtGui import QTextCursor
 
 # 忽略 Qt 样式表警告（box-shadow 等）
@@ -37,6 +37,7 @@ class QtSignalHandler(logging.Handler):
 class WorkerSignals(QObject):
     log = Signal(str)
     finished = Signal(bool, str)
+    need_login = Signal()  # 无痕模式下需要用户登录
 
 # ================== 后台工作线程 ==================
 class CourseWorker(QThread):
@@ -44,6 +45,7 @@ class CourseWorker(QThread):
         super().__init__()
         self.config = config
         self.signals = WorkerSignals()
+        self.login_loop = None  # 用于等待登录确认的事件循环
 
     def log_message(self, msg: str, level: str = "INFO"):
         self.signals.log.emit(f"[{level}] {msg}")
@@ -81,6 +83,15 @@ class CourseWorker(QThread):
                 raise Exception("课程链接不能为空")
             page.get(course_url)
             self.log_message(f"已打开课程页面: {course_url}")
+
+            # 如果是无痕模式，等待用户手动登录
+            if self.config.get("incognito", False):
+                self.log_message("无痕模式：请手动登录账号...")
+                self.signals.need_login.emit()
+                # 创建事件循环等待用户确认
+                self.login_loop = QEventLoop()
+                self.login_loop.exec()
+                self.log_message("用户已确认登录，继续执行任务")
 
             # 配置 PageConfig
             page_cfg = PageConfig()
@@ -181,7 +192,7 @@ class CourseWorker(QThread):
 
 # ================== 主窗口 ==================
 class MainWindow:
-    def __init__(self, ui_file="mainwindow.xml"):
+    def __init__(self, ui_file="mainwindow.ui"):
         self.loader = QUiLoader()
         ui_file_path = os.path.join(os.path.dirname(__file__), ui_file)
         ui_file = QFile(ui_file_path)
@@ -425,7 +436,16 @@ class MainWindow:
         self.worker = CourseWorker(config)
         self.worker.signals.log.connect(self._append_log)
         self.worker.signals.finished.connect(self._on_task_finished)
+        self.worker.signals.need_login.connect(self._on_need_login)  # 连接登录信号
         self.worker.start()
+
+    def _on_need_login(self):
+        """无痕模式下，弹出提示框要求用户登录"""
+        QMessageBox.information(self.window, "登录提示", 
+            "无痕模式：请手动登录您的账号。\n\n登录完成后，点击“确定”继续执行任务。")
+        # 退出子线程中的事件循环
+        if self.worker and self.worker.login_loop is not None:
+            self.worker.login_loop.quit()
 
     def _collect_config(self):
         task_type = "complete" if self.radio_complete_course.isChecked() else "save"
