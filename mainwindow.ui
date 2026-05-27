@@ -152,7 +152,7 @@
             <property name="geometry">
              <rect>
               <x>0</x>
-              <y>0</y>
+              <y>-229</y>
               <width>539</width>
               <height>1063</height>
              </rect>
@@ -595,8 +595,8 @@ QPushButton:pressed {
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset>
-                      <normaloff>asset/folder-icon.svg</normaloff>asset/folder-icon.svg</iconset>
+                     <iconset resource="resources.qrc">
+                      <normaloff>:/asset/asset/folder-icon.svg</normaloff>:/asset/asset/folder-icon.svg</iconset>
                     </property>
                     <property name="iconSize">
                      <size>
@@ -1943,8 +1943,8 @@ QComboBox QAbstractItemView {
  </resources>
  <connections/>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>

@@ -16,7 +16,7 @@ from PySide6.QtCore import QObject, Signal, QThread, QEventLoop
 from PySide6.QtGui import QTextCursor
 
 
-import resources_rc  # 确保资源加载（ui_main.py 也会导入，但保留不影响）
+import resources_rc
 import utils
 from course_listener import CourseHandler, PageConfig
 from DrissionPage import ChromiumPage
@@ -160,7 +160,7 @@ class CourseWorker(QThread):
 
         if mode == "manual":
             try:
-                page = ChromiumPage(addr=f"127.0.0.1:{port}")
+                page = ChromiumPage(port)
                 self.log_message(f"已连接到本地调试端口 {port} 的浏览器")
                 return page
             except Exception as e:
